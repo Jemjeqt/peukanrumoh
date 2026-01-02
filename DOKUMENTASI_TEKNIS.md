@@ -1,0 +1,1698 @@
+# 📚 DOKUMENTASI TEKNIS SISTEM PEUKAN RUMOH
+
+**Tanggal:** 27 Desember 2024  
+**Platform:** E-Commerce Marketplace  
+**Framework:** Laravel 11
+
+---
+
+> **📌 Dokumen Terkait:**  
+> - [DESKRIPSI_DAN_DESAIN_UI.md](./DESKRIPSI_DAN_DESAIN_UI.md) - Deskripsi Rancangan dan Desain UI Projek
+
+---
+
+# BAGIAN 1: DATABASE (SQL SYNTAX)
+
+## 1.1 Struktur Database Lengkap
+
+```sql
+-- =====================================================
+-- DATABASE: Peukan Rumoh (E-Commerce Platform)
+-- Generated from Laravel Migrations
+-- =====================================================
+
+-- -----------------------------------------------------
+-- Table: users
+-- Tabel utama untuk semua pengguna (pembeli, pedagang, kurir, admin)
+-- -----------------------------------------------------
+CREATE TABLE `users` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(255) NOT NULL,
+    `email` VARCHAR(255) NOT NULL UNIQUE,
+    `role` ENUM('pembeli', 'pedagang', 'kurir', 'admin') NOT NULL DEFAULT 'pembeli',
+    `is_approved` TINYINT(1) NOT NULL DEFAULT 0,
+    `phone` VARCHAR(255) NULL,
+    `address` TEXT NULL,
+    `store_name` VARCHAR(255) NULL,
+    `store_description` TEXT NULL,
+    `store_logo` VARCHAR(255) NULL,
+    `email_verified_at` TIMESTAMP NULL,
+    `password` VARCHAR(255) NOT NULL,
+    `remember_token` VARCHAR(100) NULL,
+    `created_at` TIMESTAMP NULL,
+    `updated_at` TIMESTAMP NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------
+-- Table: password_reset_tokens
+-- Token untuk reset password
+-- -----------------------------------------------------
+CREATE TABLE `password_reset_tokens` (
+    `email` VARCHAR(255) NOT NULL PRIMARY KEY,
+    `token` VARCHAR(255) NOT NULL,
+    `created_at` TIMESTAMP NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------
+-- Table: sessions
+-- Menyimpan session pengguna
+-- -----------------------------------------------------
+CREATE TABLE `sessions` (
+    `id` VARCHAR(255) NOT NULL PRIMARY KEY,
+    `user_id` BIGINT UNSIGNED NULL,
+    `ip_address` VARCHAR(45) NULL,
+    `user_agent` TEXT NULL,
+    `payload` LONGTEXT NOT NULL,
+    `last_activity` INT NOT NULL,
+    INDEX `sessions_user_id_index` (`user_id`),
+    INDEX `sessions_last_activity_index` (`last_activity`),
+    CONSTRAINT `sessions_user_id_foreign` 
+        FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------
+-- Table: cache
+-- Tabel cache Laravel
+-- -----------------------------------------------------
+CREATE TABLE `cache` (
+    `key` VARCHAR(255) NOT NULL PRIMARY KEY,
+    `value` MEDIUMTEXT NOT NULL,
+    `expiration` INT NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------
+-- Table: cache_locks
+-- Lock untuk cache
+-- -----------------------------------------------------
+CREATE TABLE `cache_locks` (
+    `key` VARCHAR(255) NOT NULL PRIMARY KEY,
+    `owner` VARCHAR(255) NOT NULL,
+    `expiration` INT NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------
+-- Table: jobs
+-- Queue jobs Laravel
+-- -----------------------------------------------------
+CREATE TABLE `jobs` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `queue` VARCHAR(255) NOT NULL,
+    `payload` LONGTEXT NOT NULL,
+    `attempts` TINYINT UNSIGNED NOT NULL,
+    `reserved_at` INT UNSIGNED NULL,
+    `available_at` INT UNSIGNED NOT NULL,
+    `created_at` INT UNSIGNED NOT NULL,
+    INDEX `jobs_queue_index` (`queue`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------
+-- Table: job_batches
+-- Batch jobs Laravel
+-- -----------------------------------------------------
+CREATE TABLE `job_batches` (
+    `id` VARCHAR(255) NOT NULL PRIMARY KEY,
+    `name` VARCHAR(255) NOT NULL,
+    `total_jobs` INT NOT NULL,
+    `pending_jobs` INT NOT NULL,
+    `failed_jobs` INT NOT NULL,
+    `failed_job_ids` LONGTEXT NOT NULL,
+    `options` MEDIUMTEXT NULL,
+    `cancelled_at` INT NULL,
+    `created_at` INT NOT NULL,
+    `finished_at` INT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------
+-- Table: failed_jobs
+-- Jobs yang gagal
+-- -----------------------------------------------------
+CREATE TABLE `failed_jobs` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `uuid` VARCHAR(255) NOT NULL UNIQUE,
+    `connection` TEXT NOT NULL,
+    `queue` TEXT NOT NULL,
+    `payload` LONGTEXT NOT NULL,
+    `exception` LONGTEXT NOT NULL,
+    `failed_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------
+-- Table: products
+-- Tabel produk yang dijual oleh pedagang
+-- -----------------------------------------------------
+CREATE TABLE `products` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `user_id` BIGINT UNSIGNED NULL,
+    `name` VARCHAR(255) NOT NULL,
+    `description` TEXT NOT NULL,
+    `price` DECIMAL(10, 2) NOT NULL,
+    `stock` INT NOT NULL DEFAULT 0,
+    `image` VARCHAR(255) NULL,
+    `category` VARCHAR(255) NOT NULL DEFAULT 'general',
+    `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+    `created_at` TIMESTAMP NULL,
+    `updated_at` TIMESTAMP NULL,
+    CONSTRAINT `products_user_id_foreign` 
+        FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------
+-- Table: carts
+-- Keranjang belanja pengguna
+-- -----------------------------------------------------
+CREATE TABLE `carts` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `user_id` BIGINT UNSIGNED NOT NULL,
+    `product_id` BIGINT UNSIGNED NOT NULL,
+    `quantity` INT NOT NULL DEFAULT 1,
+    `created_at` TIMESTAMP NULL,
+    `updated_at` TIMESTAMP NULL,
+    UNIQUE KEY `carts_user_id_product_id_unique` (`user_id`, `product_id`),
+    CONSTRAINT `carts_user_id_foreign` 
+        FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+    CONSTRAINT `carts_product_id_foreign` 
+        FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------
+-- Table: orders
+-- Tabel pesanan
+-- -----------------------------------------------------
+CREATE TABLE `orders` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `user_id` BIGINT UNSIGNED NOT NULL,
+    `kurir_id` BIGINT UNSIGNED NULL,
+    `total` DECIMAL(10, 2) NOT NULL,
+    `admin_fee` DECIMAL(12, 2) NOT NULL DEFAULT 10000.00,
+    `shipping_cost` DECIMAL(10, 2) NOT NULL DEFAULT 5000.00,
+    `status` ENUM('pending', 'paid', 'processing', 'ready_pickup', 'shipped', 'delivered', 'completed', 'cancelled') NOT NULL DEFAULT 'pending',
+    `payment_method` VARCHAR(255) NULL,
+    `shipping_address` VARCHAR(255) NULL,
+    `phone` VARCHAR(255) NULL,
+    `notes` TEXT NULL,
+    `paid_at` TIMESTAMP NULL,
+    `picked_up_at` TIMESTAMP NULL,
+    `delivered_at` TIMESTAMP NULL,
+    `created_at` TIMESTAMP NULL,
+    `updated_at` TIMESTAMP NULL,
+    CONSTRAINT `orders_user_id_foreign` 
+        FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+    CONSTRAINT `orders_kurir_id_foreign` 
+        FOREIGN KEY (`kurir_id`) REFERENCES `users`(`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------
+-- Table: order_items
+-- Item-item dalam setiap pesanan
+-- -----------------------------------------------------
+CREATE TABLE `order_items` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `order_id` BIGINT UNSIGNED NOT NULL,
+    `product_id` BIGINT UNSIGNED NOT NULL,
+    `product_name` VARCHAR(255) NOT NULL,
+    `price` DECIMAL(10, 2) NOT NULL,
+    `quantity` INT NOT NULL,
+    `subtotal` DECIMAL(10, 2) NOT NULL,
+    `created_at` TIMESTAMP NULL,
+    `updated_at` TIMESTAMP NULL,
+    CONSTRAINT `order_items_order_id_foreign` 
+        FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`) ON DELETE CASCADE,
+    CONSTRAINT `order_items_product_id_foreign` 
+        FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------
+-- Table: reviews
+-- Review produk oleh pembeli
+-- -----------------------------------------------------
+CREATE TABLE `reviews` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `user_id` BIGINT UNSIGNED NOT NULL,
+    `product_id` BIGINT UNSIGNED NOT NULL,
+    `order_id` BIGINT UNSIGNED NOT NULL,
+    `rating` INT NOT NULL DEFAULT 5,
+    `comment` TEXT NULL,
+    `created_at` TIMESTAMP NULL,
+    `updated_at` TIMESTAMP NULL,
+    UNIQUE KEY `reviews_user_id_product_id_order_id_unique` (`user_id`, `product_id`, `order_id`),
+    CONSTRAINT `reviews_user_id_foreign` 
+        FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+    CONSTRAINT `reviews_product_id_foreign` 
+        FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE CASCADE,
+    CONSTRAINT `reviews_order_id_foreign` 
+        FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------
+-- Table: returns
+-- Pengembalian barang (refund/replacement)
+-- -----------------------------------------------------
+CREATE TABLE `returns` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `user_id` BIGINT UNSIGNED NOT NULL,
+    `order_id` BIGINT UNSIGNED NOT NULL,
+    `kurir_id` BIGINT UNSIGNED NULL,
+    `replacement_kurir_id` BIGINT UNSIGNED NULL,
+    `reason` TEXT NOT NULL,
+    `evidence` VARCHAR(255) NULL,
+    `type` ENUM('replacement', 'refund') NOT NULL DEFAULT 'refund',
+    `status` ENUM('pending', 'approved', 'rejected', 'pickup', 'received', 'completed') NOT NULL DEFAULT 'pending',
+    `admin_notes` TEXT NULL,
+    `refund_proof` VARCHAR(255) NULL,
+    `approved_at` TIMESTAMP NULL,
+    `picked_up_at` TIMESTAMP NULL,
+    `received_at` TIMESTAMP NULL,
+    `completed_at` TIMESTAMP NULL,
+    `replacement_shipped_at` TIMESTAMP NULL,
+    `replacement_delivered_at` TIMESTAMP NULL,
+    `refund_sent_at` TIMESTAMP NULL,
+    `created_at` TIMESTAMP NULL,
+    `updated_at` TIMESTAMP NULL,
+    CONSTRAINT `returns_user_id_foreign` 
+        FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+    CONSTRAINT `returns_order_id_foreign` 
+        FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`) ON DELETE CASCADE,
+    CONSTRAINT `returns_kurir_id_foreign` 
+        FOREIGN KEY (`kurir_id`) REFERENCES `users`(`id`) ON DELETE SET NULL,
+    CONSTRAINT `returns_replacement_kurir_id_foreign` 
+        FOREIGN KEY (`replacement_kurir_id`) REFERENCES `users`(`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+```
+
+## 1.2 Ringkasan Struktur Database
+
+| No | Tabel | Deskripsi |
+|----|-------|-----------|
+| 1 | `users` | Semua pengguna sistem (pembeli, pedagang, kurir, admin) |
+| 2 | `password_reset_tokens` | Token untuk reset password |
+| 3 | `sessions` | Session pengguna yang aktif |
+| 4 | `cache` | Cache sistem Laravel |
+| 5 | `cache_locks` | Lock untuk cache |
+| 6 | `jobs` | Queue jobs Laravel |
+| 7 | `job_batches` | Batch jobs |
+| 8 | `failed_jobs` | Jobs yang gagal |
+| 9 | `products` | Produk yang dijual pedagang |
+| 10 | `carts` | Keranjang belanja |
+| 11 | `orders` | Pesanan pembeli |
+| 12 | `order_items` | Item dalam pesanan |
+| 13 | `reviews` | Review produk |
+| 14 | `returns` | Pengembalian barang |
+
+## 1.3 Relasi Antar Tabel (ERD)
+
+```
+users (1) ──────────────── (N) products
+users (1) ──────────────── (N) carts
+users (1) ──────────────── (N) orders
+users (1) ──────────────── (N) reviews
+users (1) ──────────────── (N) returns
+products (1) ───────────── (N) carts
+products (1) ───────────── (N) order_items
+products (1) ───────────── (N) reviews
+orders (1) ─────────────── (N) order_items
+orders (1) ─────────────── (N) reviews
+orders (1) ─────────────── (N) returns
+```
+
+---
+
+# BAGIAN 2: DAFTAR VIEWS
+
+## 2.1 Daftar Lengkap Views (51 Files)
+
+### Auth Views
+| No | Nama View | Path Laravel |
+|----|-----------|--------------|
+| 1 | `v_auth_login` | `auth.login` |
+| 2 | `v_auth_register` | `auth.register` |
+
+### General Views
+| No | Nama View | Path Laravel |
+|----|-----------|--------------|
+| 3 | `v_home` | `home` |
+
+### Shop Views (Pembeli)
+| No | Nama View | Path Laravel |
+|----|-----------|--------------|
+| 4 | `v_shop_index` | `shop.index` |
+| 5 | `v_shop_show` | `shop.show` |
+
+### Cart Views
+| No | Nama View | Path Laravel |
+|----|-----------|--------------|
+| 6 | `v_cart_index` | `cart.index` |
+
+### Checkout Views
+| No | Nama View | Path Laravel |
+|----|-----------|--------------|
+| 7 | `v_checkout_index` | `checkout.index` |
+| 8 | `v_checkout_payment` | `checkout.payment` |
+| 9 | `v_checkout_success` | `checkout.success` |
+
+### Profile Views
+| No | Nama View | Path Laravel |
+|----|-----------|--------------|
+| 10 | `v_profile_dashboard` | `profile.dashboard` |
+| 11 | `v_profile_index` | `profile.index` |
+
+### Pembeli Views
+| No | Nama View | Path Laravel |
+|----|-----------|--------------|
+| 12 | `v_pembeli_orders_index` | `pembeli.orders.index` |
+| 13 | `v_pembeli_orders_show` | `pembeli.orders.show` |
+| 14 | `v_pembeli_orders_return` | `pembeli.orders.return` |
+
+### Pedagang Views
+| No | Nama View | Path Laravel |
+|----|-----------|--------------|
+| 15 | `v_pedagang_dashboard` | `pedagang.dashboard` |
+| 16 | `v_pedagang_products_index` | `pedagang.products.index` |
+| 17 | `v_pedagang_products_create` | `pedagang.products.create` |
+| 18 | `v_pedagang_products_edit` | `pedagang.products.edit` |
+| 19 | `v_pedagang_products_show` | `pedagang.products.show` |
+| 20 | `v_pedagang_orders_index` | `pedagang.orders.index` |
+| 21 | `v_pedagang_orders_show` | `pedagang.orders.show` |
+| 22 | `v_pedagang_returns_index` | `pedagang.returns.index` |
+| 23 | `v_pedagang_returns_show` | `pedagang.returns.show` |
+| 24 | `v_pedagang_reviews_index` | `pedagang.reviews.index` |
+| 25 | `v_pedagang_reports_sales` | `pedagang.reports.sales` |
+| 26 | `v_pedagang_partials_sidebar_menu` | `pedagang.partials.sidebar-menu` |
+
+### Kurir Views
+| No | Nama View | Path Laravel |
+|----|-----------|--------------|
+| 27 | `v_kurir_dashboard` | `kurir.dashboard` |
+| 28 | `v_kurir_deliveries_index` | `kurir.deliveries.index` |
+| 29 | `v_kurir_deliveries_show` | `kurir.deliveries.show` |
+| 30 | `v_kurir_deliveries_history` | `kurir.deliveries.history` |
+| 31 | `v_kurir_returns_index` | `kurir.returns.index` |
+| 32 | `v_kurir_returns_show` | `kurir.returns.show` |
+| 33 | `v_kurir_partials_sidebar_menu` | `kurir.partials.sidebar-menu` |
+
+### Admin Views
+| No | Nama View | Path Laravel |
+|----|-----------|--------------|
+| 34 | `v_admin_dashboard` | `admin.dashboard` |
+| 35 | `v_admin_users_index` | `admin.users.index` |
+| 36 | `v_admin_users_create` | `admin.users.create` |
+| 37 | `v_admin_users_edit` | `admin.users.edit` |
+| 38 | `v_admin_users_show` | `admin.users.show` |
+| 39 | `v_admin_products_index` | `admin.products.index` |
+| 40 | `v_admin_products_show` | `admin.products.show` |
+| 41 | `v_admin_orders_index` | `admin.orders.index` |
+| 42 | `v_admin_orders_show` | `admin.orders.show` |
+| 43 | `v_admin_returns_index` | `admin.returns.index` |
+| 44 | `v_admin_returns_show` | `admin.returns.show` |
+| 45 | `v_admin_reviews_index` | `admin.reviews.index` |
+| 46 | `v_admin_reports_monthly` | `admin.reports.monthly` |
+| 47 | `v_admin_partials_sidebar_menu` | `admin.partials.sidebar-menu` |
+
+### Layout Views
+| No | Nama View | Path Laravel |
+|----|-----------|--------------|
+| 48 | `v_layouts_app` | `layouts.app` |
+| 49 | `v_layouts_dashboard` | `layouts.dashboard` |
+| 50 | `v_layouts_main` | `layouts.main` |
+
+### Partials Views
+| No | Nama View | Path Laravel |
+|----|-----------|--------------|
+| 51 | `v_partials_navbar` | `partials.navbar` |
+
+## 2.2 Ringkasan per Modul
+
+| Modul | Jumlah Views |
+|-------|:------------:|
+| Auth | 2 |
+| General (Home) | 1 |
+| Shop | 2 |
+| Cart | 1 |
+| Checkout | 3 |
+| Profile | 2 |
+| Pembeli | 3 |
+| Pedagang | 12 |
+| Kurir | 7 |
+| Admin | 14 |
+| Layouts | 3 |
+| Partials | 1 |
+| **Total** | **51** |
+
+---
+
+# BAGIAN 3: DAFTAR MODELS
+
+## 3.1 Model: User
+**File:** `app/Models/User.php`  
+**Table:** `users`
+
+### Atribut (Fillable)
+| Atribut | Tipe Data |
+|---------|-----------|
+| `name` | `VARCHAR(255)` |
+| `email` | `VARCHAR(255)` |
+| `password` | `VARCHAR(255)` (hashed) |
+| `role` | `ENUM('pembeli', 'pedagang', 'kurir', 'admin')` |
+| `is_approved` | `BOOLEAN` |
+| `phone` | `VARCHAR(255)` / NULL |
+| `address` | `TEXT` / NULL |
+| `store_name` | `VARCHAR(255)` / NULL |
+| `store_description` | `TEXT` / NULL |
+| `store_logo` | `VARCHAR(255)` / NULL |
+
+### Casts
+| Atribut | Cast To |
+|---------|---------|
+| `email_verified_at` | `datetime` |
+| `password` | `hashed` |
+| `is_approved` | `boolean` |
+
+### Functions
+| Function | Return Type | Deskripsi |
+|----------|-------------|-----------|
+| `isAdmin()` | `bool` | Cek apakah user adalah admin |
+| `isPedagang()` | `bool` | Cek apakah user adalah pedagang |
+| `isKurir()` | `bool` | Cek apakah user adalah kurir |
+| `isPembeli()` | `bool` | Cek apakah user adalah pembeli |
+| `products()` | `HasMany` | Relasi ke produk (pedagang) |
+| `orders()` | `HasMany` | Relasi ke pesanan (pembeli) |
+| `deliveries()` | `HasMany` | Relasi ke pengiriman (kurir) |
+| `carts()` | `HasMany` | Relasi ke keranjang |
+
+---
+
+## 3.2 Model: Product
+**File:** `app/Models/Product.php`  
+**Table:** `products`
+
+### Atribut (Fillable)
+| Atribut | Tipe Data |
+|---------|-----------|
+| `user_id` | `BIGINT UNSIGNED` (FK → users) |
+| `name` | `VARCHAR(255)` |
+| `description` | `TEXT` |
+| `price` | `DECIMAL(10,2)` |
+| `stock` | `INT` |
+| `image` | `VARCHAR(255)` / NULL |
+| `category` | `VARCHAR(255)` |
+| `is_active` | `BOOLEAN` |
+
+### Casts
+| Atribut | Cast To |
+|---------|---------|
+| `price` | `decimal:2` |
+| `is_active` | `boolean` |
+
+### Functions
+| Function | Return Type | Deskripsi |
+|----------|-------------|-----------|
+| `pedagang()` | `BelongsTo` | Relasi ke pedagang (user) |
+| `user()` | `BelongsTo` | Alias relasi ke user |
+| `cartItems()` | `HasMany` | Relasi ke item cart |
+| `orderItems()` | `HasMany` | Relasi ke item order |
+| `reviews()` | `HasMany` | Relasi ke reviews |
+| `scopeActive($query)` | `Builder` | Scope: produk aktif saja |
+| `scopeInStock($query)` | `Builder` | Scope: produk yg ada stok |
+| `getImageUrlAttribute()` | `?string` | Accessor: URL gambar lengkap |
+
+---
+
+## 3.3 Model: Cart
+**File:** `app/Models/Cart.php`  
+**Table:** `carts`
+
+### Atribut (Fillable)
+| Atribut | Tipe Data |
+|---------|-----------|
+| `user_id` | `BIGINT UNSIGNED` (FK → users) |
+| `product_id` | `BIGINT UNSIGNED` (FK → products) |
+| `quantity` | `INT` |
+
+### Functions
+| Function | Return Type | Deskripsi |
+|----------|-------------|-----------|
+| `user()` | `BelongsTo` | Relasi ke user |
+| `product()` | `BelongsTo` | Relasi ke product |
+| `getSubtotalAttribute()` | `float` | Accessor: hitungan subtotal |
+
+---
+
+## 3.4 Model: Order
+**File:** `app/Models/Order.php`  
+**Table:** `orders`
+
+### Konstanta
+| Konstanta | Nilai | Deskripsi |
+|-----------|-------|-----------|
+| `ADMIN_FEE` | `10000` | Biaya admin per transaksi |
+| `SHIPPING_COST` | `5000` | Ongkos kirim |
+
+### Atribut (Fillable)
+| Atribut | Tipe Data |
+|---------|-----------|
+| `user_id` | `BIGINT UNSIGNED` (FK → users) |
+| `kurir_id` | `BIGINT UNSIGNED` / NULL (FK → users) |
+| `total` | `DECIMAL(10,2)` |
+| `shipping_cost` | `DECIMAL(10,2)` |
+| `admin_fee` | `DECIMAL(12,2)` |
+| `status` | `ENUM('pending', 'paid', 'processing', 'ready_pickup', 'shipped', 'delivered', 'completed', 'cancelled')` |
+| `payment_method` | `VARCHAR(255)` / NULL |
+| `shipping_address` | `VARCHAR(255)` / NULL |
+| `phone` | `VARCHAR(255)` / NULL |
+| `notes` | `TEXT` / NULL |
+| `paid_at` | `TIMESTAMP` / NULL |
+| `picked_up_at` | `TIMESTAMP` / NULL |
+| `delivered_at` | `TIMESTAMP` / NULL |
+
+### Casts
+| Atribut | Cast To |
+|---------|---------|
+| `total` | `decimal:2` |
+| `shipping_cost` | `decimal:2` |
+| `admin_fee` | `decimal:2` |
+| `paid_at` | `datetime` |
+| `picked_up_at` | `datetime` |
+| `delivered_at` | `datetime` |
+
+### Functions
+| Function | Return Type | Deskripsi |
+|----------|-------------|-----------|
+| `user()` | `BelongsTo` | Relasi ke pembeli (user) |
+| `kurir()` | `BelongsTo` | Relasi ke kurir (user) |
+| `items()` | `HasMany` | Relasi ke order items |
+| `getStatusBadgeAttribute()` | `string` | Accessor: class badge status |
+| `getStatusLabelAttribute()` | `string` | Accessor: label status (Indonesia) |
+
+---
+
+## 3.5 Model: OrderItem
+**File:** `app/Models/OrderItem.php`  
+**Table:** `order_items`
+
+### Atribut (Fillable)
+| Atribut | Tipe Data |
+|---------|-----------|
+| `order_id` | `BIGINT UNSIGNED` (FK → orders) |
+| `product_id` | `BIGINT UNSIGNED` (FK → products) |
+| `product_name` | `VARCHAR(255)` |
+| `price` | `DECIMAL(10,2)` |
+| `quantity` | `INT` |
+| `subtotal` | `DECIMAL(10,2)` |
+
+### Casts
+| Atribut | Cast To |
+|---------|---------|
+| `price` | `decimal:2` |
+| `subtotal` | `decimal:2` |
+
+### Functions
+| Function | Return Type | Deskripsi |
+|----------|-------------|-----------|
+| `order()` | `BelongsTo` | Relasi ke order |
+| `product()` | `BelongsTo` | Relasi ke product |
+
+---
+
+## 3.6 Model: Review
+**File:** `app/Models/Review.php`  
+**Table:** `reviews`
+
+### Atribut (Fillable)
+| Atribut | Tipe Data |
+|---------|-----------|
+| `user_id` | `BIGINT UNSIGNED` (FK → users) |
+| `product_id` | `BIGINT UNSIGNED` (FK → products) |
+| `order_id` | `BIGINT UNSIGNED` (FK → orders) |
+| `rating` | `INT` (1-5) |
+| `comment` | `TEXT` / NULL |
+
+### Functions
+| Function | Return Type | Deskripsi |
+|----------|-------------|-----------|
+| `user()` | `BelongsTo` | Relasi ke reviewer (user) |
+| `product()` | `BelongsTo` | Relasi ke product |
+| `order()` | `BelongsTo` | Relasi ke order |
+
+---
+
+## 3.7 Model: ProductReturn
+**File:** `app/Models/ProductReturn.php`  
+**Table:** `returns`
+
+### Atribut (Fillable)
+| Atribut | Tipe Data |
+|---------|-----------|
+| `user_id` | `BIGINT UNSIGNED` (FK → users) |
+| `order_id` | `BIGINT UNSIGNED` (FK → orders) |
+| `kurir_id` | `BIGINT UNSIGNED` / NULL (FK → users) |
+| `replacement_kurir_id` | `BIGINT UNSIGNED` / NULL (FK → users) |
+| `reason` | `TEXT` |
+| `evidence` | `VARCHAR(255)` / NULL |
+| `type` | `ENUM('replacement', 'refund')` |
+| `status` | `ENUM('pending', 'approved', 'rejected', 'pickup', 'received', 'completed')` |
+| `admin_notes` | `TEXT` / NULL |
+| `approved_at` | `TIMESTAMP` / NULL |
+| `picked_up_at` | `TIMESTAMP` / NULL |
+| `received_at` | `TIMESTAMP` / NULL |
+| `replacement_shipped_at` | `TIMESTAMP` / NULL |
+| `replacement_delivered_at` | `TIMESTAMP` / NULL |
+| `refund_sent_at` | `TIMESTAMP` / NULL |
+| `refund_proof` | `VARCHAR(255)` / NULL |
+| `completed_at` | `TIMESTAMP` / NULL |
+
+### Casts
+| Atribut | Cast To |
+|---------|---------|
+| `approved_at` | `datetime` |
+| `picked_up_at` | `datetime` |
+| `received_at` | `datetime` |
+| `replacement_shipped_at` | `datetime` |
+| `replacement_delivered_at` | `datetime` |
+| `refund_sent_at` | `datetime` |
+| `completed_at` | `datetime` |
+
+### Functions
+| Function | Return Type | Deskripsi |
+|----------|-------------|-----------|
+| `user()` | `BelongsTo` | Relasi ke pembeli |
+| `order()` | `BelongsTo` | Relasi ke order |
+| `kurir()` | `BelongsTo` | Relasi ke kurir pengambil |
+| `replacementKurir()` | `BelongsTo` | Relasi ke kurir pengantar pengganti |
+| `getStatusLabelAttribute()` | `string` | Accessor: label status (Indonesia) |
+| `getStatusBadgeAttribute()` | `string` | Accessor: class badge status |
+| `getTypeLabelAttribute()` | `string` | Accessor: label tipe return |
+| `getEvidenceUrlAttribute()` | `?string` | Accessor: URL bukti kerusakan |
+| `getRefundProofUrlAttribute()` | `?string` | Accessor: URL bukti refund |
+
+---
+
+## 3.8 Ringkasan Model
+
+| No | Model | Table | Jumlah Atribut | Jumlah Functions |
+|----|-------|-------|:--------------:|:----------------:|
+| 1 | `User` | `users` | 10 | 8 |
+| 2 | `Product` | `products` | 8 | 8 |
+| 3 | `Cart` | `carts` | 3 | 3 |
+| 4 | `Order` | `orders` | 13 | 5 |
+| 5 | `OrderItem` | `order_items` | 6 | 2 |
+| 6 | `Review` | `reviews` | 5 | 3 |
+| 7 | `ProductReturn` | `returns` | 17 | 9 |
+| **Total** | | **7 Model** | **62 Atribut** | **38 Functions** |
+
+---
+
+# BAGIAN 4: DAFTAR CONTROLLERS
+
+## 4.1 C_DASHBOARD (Controller Dashboard)
+
+**Menggabungkan:** `Admin\DashboardController`, `Pedagang\DashboardController`, `Kurir\DashboardController`
+
+### Model yang Digunakan
+| Model | Keterangan |
+|-------|------------|
+| `User` | Statistik pengguna |
+| `Product` | Statistik produk |
+| `Order` | Statistik pesanan |
+| `OrderItem` | Statistik item pesanan |
+| `ProductReturn` | Statistik pengembalian |
+| `Review` | Statistik ulasan |
+
+### Admin\DashboardController
+
+| Method | Return | Deskripsi |
+|--------|--------|-----------|
+| `index()` | `View` | Menampilkan dashboard admin |
+| `exportReport()` | `Response (PDF)` | Ekspor laporan bulanan PDF |
+
+**Variabel `index()`:**
+| Variabel | Tipe Data | Deskripsi |
+|----------|-----------|-----------|
+| `stats['total_pembeli']` | `int` | Jumlah pembeli |
+| `stats['total_pedagang']` | `int` | Jumlah pedagang |
+| `stats['total_kurir']` | `int` | Jumlah kurir |
+| `stats['total_products']` | `int` | Jumlah produk |
+| `stats['total_orders']` | `int` | Jumlah pesanan |
+| `stats['total_revenue']` | `decimal` | Total pendapatan |
+| `stats['admin_revenue']` | `decimal` | Pendapatan admin fee |
+| `stats['pending_approvals']` | `int` | Pengguna menunggu approval |
+| `recentOrders` | `Collection<Order>` | 5 pesanan terbaru |
+| `ordersByStatus` | `array` | Chart data pesanan per status |
+| `dailySales` | `Collection` | Penjualan harian 7 hari |
+| `lowStockProducts` | `Collection<Product>` | Produk stok rendah |
+| `pendingUsers` | `Collection<User>` | User menunggu approval |
+
+### Pedagang\DashboardController
+
+| Method | Return | Deskripsi |
+|--------|--------|-----------|
+| `index()` | `View` | Menampilkan dashboard pedagang |
+| `exportReport()` | `Response (PDF)` | Ekspor laporan penjualan PDF |
+
+**Variabel `index()`:**
+| Variabel | Tipe Data | Deskripsi |
+|----------|-----------|-----------|
+| `revenue['total']` | `decimal` | Total pendapatan |
+| `revenue['today']` | `decimal` | Pendapatan hari ini |
+| `revenue['this_week']` | `decimal` | Pendapatan minggu ini |
+| `revenue['this_month']` | `decimal` | Pendapatan bulan ini |
+| `revenue['this_year']` | `decimal` | Pendapatan tahun ini |
+| `dailyRevenue` | `array` | Chart 7 hari terakhir |
+| `monthlyRevenue` | `array` | Chart 6 bulan terakhir |
+| `stats['total_products']` | `int` | Jumlah produk |
+| `stats['active_products']` | `int` | Produk aktif |
+| `stats['low_stock']` | `int` | Produk stok rendah |
+| `stats['out_of_stock']` | `int` | Produk habis |
+| `stats['total_orders']` | `int` | Total pesanan |
+| `stats['pending_orders']` | `int` | Pesanan pending |
+| `recentOrders` | `Collection<Order>` | 5 pesanan terbaru |
+| `topProducts` | `Collection` | 5 produk terlaris |
+| `lowStockProducts` | `Collection<Product>` | Produk stok rendah |
+
+### Kurir\DashboardController
+
+| Method | Return | Deskripsi |
+|--------|--------|-----------|
+| `index()` | `View` | Menampilkan dashboard kurir |
+
+**Variabel `index()`:**
+| Variabel | Tipe Data | Deskripsi |
+|----------|-----------|-----------|
+| `stats['pending_pickup']` | `int` | Pesanan siap diambil |
+| `stats['in_delivery']` | `int` | Pesanan dalam pengiriman |
+| `stats['completed_today']` | `int` | Selesai hari ini |
+| `stats['total_completed']` | `int` | Total selesai |
+| `stats['total_earnings']` | `decimal` | Total pendapatan |
+| `stats['earnings_today']` | `decimal` | Pendapatan hari ini |
+| `stats['returns']` | `int` | Return aktif |
+| `pendingPickups` | `Collection<Order>` | 5 pesanan siap pickup |
+| `inDelivery` | `Collection<Order>` | 5 pesanan dalam kirim |
+
+---
+
+## 4.2 C_PRODUCT (Controller Product)
+
+**Menggabungkan:** `Admin\ProductController`, `Pedagang\ProductController`, `Api\ProductController`, `ShopController`
+
+### Model yang Digunakan
+| Model | Keterangan |
+|-------|------------|
+| `Product` | CRUD produk |
+| `OrderItem` | Statistik penjualan |
+| `Review` | Rating & ulasan |
+
+### Admin\ProductController
+
+| Method | Return | Deskripsi |
+|--------|--------|-----------|
+| `index(Request $request)` | `View` | List semua produk (monitoring) |
+| `show(Product $product)` | `View` | Detail produk |
+
+### Pedagang\ProductController
+
+| Method | Return | Deskripsi |
+|--------|--------|-----------|
+| `index(Request $request)` | `View/JSON` | List produk pedagang |
+| `create()` | `View` | Form tambah produk |
+| `store(Request $request)` | `Redirect/JSON` | Simpan produk baru |
+| `show(Product $product)` | `View` | Detail produk |
+| `edit(Product $product)` | `View/JSON` | Form edit produk |
+| `update(Request $request, Product $product)` | `Redirect/JSON` | Update produk |
+| `destroy(Product $product)` | `Redirect/JSON` | Hapus produk |
+
+### Api\ProductController
+
+| Method | Return | Deskripsi |
+|--------|--------|-----------|
+| `index(Request $request)` | `JSON` | List produk (API) |
+| `show(Product $product)` | `JSON` | Detail produk (API) |
+| `store(Request $request)` | `JSON` | Tambah produk (API) |
+| `update(Request $request, Product $product)` | `JSON` | Update produk (API) |
+| `destroy(Request $request, Product $product)` | `JSON` | Hapus produk (API) |
+| `uploadImage(Request $request, Product $product)` | `JSON` | Upload gambar (API) |
+
+### ShopController
+
+| Method | Return | Deskripsi |
+|--------|--------|-----------|
+| `index(Request $request)` | `View` | Halaman toko |
+| `show(Product $product)` | `View` | Detail produk toko |
+
+---
+
+## 4.3 C_ORDER (Controller Order)
+
+**Menggabungkan:** `Admin\OrderController`, `Pedagang\OrderController`, `Pembeli\OrderHistoryController`, `Kurir\DeliveryController`
+
+### Model yang Digunakan
+| Model | Keterangan |
+|-------|------------|
+| `Order` | Data pesanan |
+| `OrderItem` | Item pesanan |
+| `User` | User/kurir |
+| `ProductReturn` | Return order |
+| `Review` | Ulasan produk |
+
+### Admin\OrderController
+
+| Method | Return | Deskripsi |
+|--------|--------|-----------|
+| `index(Request $request)` | `View/JSON` | List semua pesanan |
+| `show(Order $order)` | `View/JSON` | Detail pesanan |
+| `updateStatus(Request $request, Order $order)` | `Redirect/JSON` | Update status |
+
+### Pedagang\OrderController
+
+| Method | Return | Deskripsi |
+|--------|--------|-----------|
+| `index(Request $request)` | `View/JSON` | List pesanan pedagang |
+| `show(Order $order)` | `View` | Detail pesanan |
+| `process(Order $order)` | `Redirect/JSON` | Proses pesanan |
+| `readyPickup(Request $request, Order $order)` | `Redirect/JSON` | Siap pickup + assign kurir |
+
+### Pembeli\OrderHistoryController
+
+| Method | Return | Deskripsi |
+|--------|--------|-----------|
+| `index()` | `View` | Riwayat pesanan pembeli |
+| `show(Order $order)` | `View` | Detail pesanan |
+| `storeReview(Request $request, Order $order)` | `Redirect` | Simpan review |
+| `createReturn(Order $order)` | `View` | Form request return |
+| `storeReturn(Request $request, Order $order)` | `Redirect` | Simpan request return |
+| `confirmReplacement(Order $order)` | `Redirect` | Konfirmasi terima barang pengganti |
+| `confirmRefund(Order $order)` | `Redirect` | Konfirmasi terima refund |
+| `confirmDelivery(Order $order)` | `Redirect` | Konfirmasi terima pesanan |
+
+### Kurir\DeliveryController
+
+| Method | Return | Deskripsi |
+|--------|--------|-----------|
+| `index(Request $request)` | `View/JSON` | List pengiriman aktif |
+| `show(Order $order)` | `View` | Detail pengiriman |
+| `pickup(Order $order)` | `Redirect/JSON` | Ambil pesanan dari pedagang |
+| `deliver(Order $order)` | `Redirect/JSON` | Antar ke pembeli |
+| `history(Request $request)` | `View` | Riwayat pengiriman selesai |
+
+---
+
+## 4.4 C_RETURN (Controller Return)
+
+**Menggabungkan:** `Admin\ReturnController`, `Pedagang\ReturnController`, `Kurir\ReturnController`
+
+### Model yang Digunakan
+| Model | Keterangan |
+|-------|------------|
+| `ProductReturn` | Data pengembalian |
+| `Order` | Pesanan terkait |
+| `User` | Kurir & pembeli |
+
+### Admin\ReturnController
+
+| Method | Return | Deskripsi |
+|--------|--------|-----------|
+| `index(Request $request)` | `View` | List semua return (monitoring) |
+| `show(ProductReturn $return)` | `View` | Detail return |
+
+### Pedagang\ReturnController
+
+| Method | Return | Deskripsi |
+|--------|--------|-----------|
+| `index(Request $request)` | `View` | List return |
+| `show(ProductReturn $return)` | `View` | Detail return |
+| `approve(Request $request, ProductReturn $return)` | `Redirect` | Setujui return + assign kurir |
+| `reject(Request $request, ProductReturn $return)` | `Redirect` | Tolak return |
+| `sendReplacement(Request $request, ProductReturn $return)` | `Redirect` | Kirim barang pengganti |
+| `sendRefund(Request $request, ProductReturn $return)` | `Redirect` | Kirim refund + bukti |
+
+### Kurir\ReturnController
+
+| Method | Return | Deskripsi |
+|--------|--------|-----------|
+| `index(Request $request)` | `View` | List return aktif |
+| `show(ProductReturn $return)` | `View` | Detail return |
+| `pickup(ProductReturn $return)` | `Redirect` | Ambil barang dari pembeli |
+| `deliver(ProductReturn $return)` | `Redirect` | Antar ke pedagang |
+| `deliverReplacement(ProductReturn $return)` | `Redirect` | Antar barang pengganti |
+
+---
+
+## 4.5 C_REVIEW (Controller Review)
+
+**Menggabungkan:** `Admin\ReviewController`, `Pedagang\ReviewController`
+
+### Model yang Digunakan
+| Model | Keterangan |
+|-------|------------|
+| `Review` | Data ulasan |
+| `Product` | Produk terkait |
+
+### Admin\ReviewController
+
+| Method | Return | Deskripsi |
+|--------|--------|-----------|
+| `index(Request $request)` | `View` | List semua review + statistik |
+
+**Variabel `index()`:**
+| Variabel | Tipe Data | Deskripsi |
+|----------|-----------|-----------|
+| `stats['total']` | `int` | Total review |
+| `stats['average']` | `float` | Rating rata-rata |
+| `stats['count_5']` | `int` | Jumlah rating 5 |
+| `stats['count_4']` | `int` | Jumlah rating 4 |
+| `stats['count_3']` | `int` | Jumlah rating 3 |
+| `stats['count_2']` | `int` | Jumlah rating 2 |
+| `stats['count_1']` | `int` | Jumlah rating 1 |
+| `reviews` | `Paginator<Review>` | Daftar review |
+| `products` | `Collection<Product>` | Produk untuk filter |
+
+### Pedagang\ReviewController
+
+| Method | Return | Deskripsi |
+|--------|--------|-----------|
+| `index(Request $request)` | `View` | List review produk pedagang |
+
+---
+
+## 4.6 C_USER (Controller User)
+
+**Hanya:** `Admin\UserController`
+
+### Admin\UserController
+
+| Method | Return | Deskripsi |
+|--------|--------|-----------|
+| `index(Request $request)` | `View/JSON` | List semua user |
+| `create()` | `View` | Form tambah user |
+| `store(Request $request)` | `Redirect/JSON` | Simpan user baru |
+| `show(User $user)` | `View` | Detail user |
+| `edit(User $user)` | `View/JSON` | Form edit user |
+| `update(Request $request, User $user)` | `Redirect/JSON` | Update user |
+| `destroy(User $user)` | `Redirect/JSON` | Hapus user |
+| `approve(User $user)` | `Redirect/JSON` | Setujui user |
+| `reject(User $user)` | `Redirect/JSON` | Cabut persetujuan |
+
+---
+
+## 4.7 C_AUTH (Controller Auth)
+
+**Menggabungkan:** `Auth\AuthController`, `Api\AuthController`
+
+### Auth\AuthController
+
+| Method | Return | Deskripsi |
+|--------|--------|-----------|
+| `showLoginForm()` | `View` | Halaman login |
+| `login(Request $request)` | `Redirect` | Proses login |
+| `showRegistrationForm()` | `View` | Halaman registrasi |
+| `register(Request $request)` | `Redirect` | Proses registrasi |
+| `logout(Request $request)` | `Redirect` | Logout |
+
+### Api\AuthController
+
+| Method | Return | Deskripsi |
+|--------|--------|-----------|
+| `register(Request $request)` | `JSON` | Registrasi (API) |
+| `login(Request $request)` | `JSON` | Login (API) |
+| `logout(Request $request)` | `JSON` | Logout (API) |
+| `user(Request $request)` | `JSON` | Data user (API) |
+
+---
+
+## 4.8 C_CART (Controller Cart)
+
+**Hanya:** `CartController`
+
+| Method | Return | Deskripsi |
+|--------|--------|-----------|
+| `index()` | `View` | Halaman keranjang |
+| `add(Request $request, Product $product)` | `Redirect` | Tambah ke keranjang |
+| `update(Request $request, Cart $cart)` | `Redirect` | Update jumlah |
+| `remove(Cart $cart)` | `Redirect` | Hapus item |
+| `clear()` | `Redirect` | Kosongkan keranjang |
+
+**Variabel `index()`:**
+| Variabel | Tipe Data | Deskripsi |
+|----------|-----------|-----------|
+| `cartItems` | `Collection<Cart>` | Item keranjang |
+| `total` | `float` | Total harga |
+
+---
+
+## 4.9 C_CHECKOUT (Controller Checkout)
+
+**Hanya:** `CheckoutController`
+
+| Method | Return | Deskripsi |
+|--------|--------|-----------|
+| `index()` | `View` | Halaman checkout |
+| `process(Request $request)` | `Redirect` | Proses checkout |
+| `payment()` | `View` | Halaman pembayaran |
+| `confirmPayment(Request $request)` | `Redirect` | Konfirmasi bayar |
+| `success(Order $order)` | `View` | Halaman sukses |
+| `payOrder(Order $order)` | `View` | Bayar pesanan pending |
+
+**Variabel `index()`:**
+| Variabel | Tipe Data | Deskripsi |
+|----------|-----------|-----------|
+| `cartItems` | `Collection<Cart>` | Item keranjang |
+| `subtotal` | `float` | Subtotal |
+| `adminFee` | `int` | Biaya admin (Rp 10.000) |
+| `shippingCost` | `int` | Ongkir (Rp 5.000) |
+| `total` | `float` | Total bayar |
+
+---
+
+## 4.10 C_HOME & C_PROFILE
+
+### HomeController
+
+| Method | Return | Deskripsi |
+|--------|--------|-----------|
+| `index()` | `View` | Halaman utama home |
+
+### ProfileController
+
+| Method | Return | Deskripsi |
+|--------|--------|-----------|
+| `index()` | `View` | Halaman profil |
+| `update(Request $request)` | `Redirect` | Update profil |
+| `updatePassword(Request $request)` | `Redirect` | Update password |
+
+**Variabel `index()`:**
+| Variabel | Tipe Data | Deskripsi |
+|----------|-----------|-----------|
+| `user` | `User` | Data user login |
+| `stats['total_orders']` | `int` | Total pesanan (pembeli) |
+| `stats['total_spent']` | `decimal` | Total belanja (pembeli) |
+| `orders` | `Paginator<Order>` | 5 pesanan terbaru |
+
+---
+
+## 4.11 RINGKASAN CONTROLLER
+
+| Grup Controller | Jumlah Controller | Jumlah Methods |
+|-----------------|:-----------------:|:--------------:|
+| C_DASHBOARD | 3 | 4 |
+| C_PRODUCT | 4 | 15 |
+| C_ORDER | 4 | 17 |
+| C_RETURN | 3 | 11 |
+| C_REVIEW | 2 | 2 |
+| C_USER | 1 | 9 |
+| C_AUTH | 2 | 9 |
+| C_CART | 1 | 5 |
+| C_CHECKOUT | 1 | 6 |
+| C_HOME | 1 | 1 |
+| C_PROFILE | 1 | 3 |
+| **TOTAL** | **23 Controller** | **82 Methods** |
+
+---
+
+# BAGIAN 5: DETAIL VIEWS (ATRIBUT & FUNGSI)
+
+**Format:** `+ atribut : tipe_komponen` dan `+ fungsi()`
+
+---
+
+## 5.1 AUTH VIEWS
+
+### v_auth_login (`auth.login`)
+
+**Atribut (Form Fields)**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ email` | `JTextField` | Input email pengguna |
+| 2 | `+ password` | `JPasswordField` | Input password |
+| 3 | `+ remember` | `JCheckBox` | Checkbox "Ingat saya" |
+| 4 | `+ btnMasuk` | `JButton` | Tombol submit login |
+| 5 | `+ linkRegister` | `JLink` | Link ke halaman register |
+
+**Functions:** *Tidak ada JavaScript function*
+
+---
+
+### v_auth_register (`auth.register`)
+
+**Atribut (Form Fields)**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ name` | `JTextField` | Input nama lengkap |
+| 2 | `+ email` | `JTextField` | Input email |
+| 3 | `+ role` | `JRadioButton` | Pilihan role (pembeli/pedagang/kurir) |
+| 4 | `+ phone` | `JTextField` | Input nomor telepon |
+| 5 | `+ address` | `JTextField` | Input alamat |
+| 6 | `+ password` | `JPasswordField` | Input password |
+| 7 | `+ password_confirmation` | `JPasswordField` | Konfirmasi password |
+| 8 | `+ btnDaftar` | `JButton` | Tombol submit registrasi |
+| 9 | `+ linkLogin` | `JLink` | Link ke halaman login |
+
+**Functions:** *Tidak ada JavaScript function*
+
+---
+
+## 5.2 GENERAL VIEWS
+
+### v_home (`home`)
+
+**Atribut (Display Components)**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ hero_section` | `JPanel` | Bagian hero dengan banner |
+| 2 | `+ quick_actions` | `JPanel` | Menu aksi cepat |
+| 3 | `+ promo_section` | `JPanel` | Bagian promo |
+| 4 | `+ categories_grid` | `JPanel` | Grid kategori produk |
+| 5 | `+ info_cards` | `JPanel` | Kartu info layanan |
+| 6 | `+ linkBelanja` | `JLink` | Link ke halaman shop |
+| 7 | `+ linkKeranjang` | `JLink` | Link ke keranjang |
+| 8 | `+ linkPesanan` | `JLink` | Link ke pesanan |
+| 9 | `+ linkProfil` | `JLink` | Link ke profil |
+
+**Functions:** *View statis tanpa interaksi JS*
+
+---
+
+## 5.3 SHOP VIEWS
+
+### v_shop_index (`shop.index`)
+
+**Atribut**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ category_tabs` | `JTabbedPane` | Tab kategori produk |
+| 2 | `+ products_grid` | `JPanel` | Grid produk |
+| 3 | `+ product_card` | `JPanel` | Kartu produk individual |
+| 4 | `+ product_image` | `JImage` | Gambar produk |
+| 5 | `+ product_name` | `JLabel` | Nama produk |
+| 6 | `+ product_price` | `JLabel` | Harga produk |
+| 7 | `+ product_store` | `JLabel` | Nama toko |
+| 8 | `+ product_stock` | `JLabel` | Informasi stok |
+| 9 | `+ btnAddCart` | `JButton` | Tombol tambah keranjang |
+| 10 | `+ pagination` | `JPanel` | Navigasi halaman |
+
+**Functions:** *Tidak ada JavaScript function*
+
+---
+
+### v_shop_show (`shop.show`)
+
+**Atribut**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ breadcrumb` | `JPanel` | Navigasi breadcrumb |
+| 2 | `+ product_image_main` | `JImage` | Gambar utama produk |
+| 3 | `+ product_category` | `JLabel` | Kategori produk |
+| 4 | `+ product_title` | `JLabel` | Nama/judul produk |
+| 5 | `+ product_store` | `JLabel` | Nama toko pedagang |
+| 6 | `+ stat_sold` | `JLabel` | Jumlah terjual |
+| 7 | `+ stat_rating` | `JLabel` | Rating & jumlah ulasan |
+| 8 | `+ product_price` | `JLabel` | Harga produk |
+| 9 | `+ product_description` | `JTextArea` | Deskripsi produk |
+| 10 | `+ stock_info` | `JLabel` | Informasi stok |
+| 11 | `+ quantity` | `JSpinner` | Input jumlah pembelian |
+| 12 | `+ btnAddCart` | `JButton` | Tombol tambah keranjang |
+| 13 | `+ btnBack` | `JButton` | Tombol kembali |
+| 14 | `+ related_products` | `JPanel` | Grid produk terkait |
+| 15 | `+ reviews_section` | `JPanel` | Bagian ulasan pembeli |
+
+**Functions**
+| No | Nama Function | Deskripsi |
+|----|---------------|-----------|
+| 1 | `+ decreaseQty()` | Mengurangi jumlah quantity (min 1) |
+| 2 | `+ increaseQty(max)` | Menambah jumlah quantity (max = stok) |
+
+---
+
+## 5.4 CART VIEWS
+
+### v_cart_index (`cart.index`)
+
+**Atribut**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ cart_steps` | `JPanel` | Progress step (1-4) |
+| 2 | `+ cart_items` | `JPanel` | Daftar item keranjang |
+| 3 | `+ cart_item_image` | `JImage` | Gambar produk |
+| 4 | `+ cart_item_name` | `JLabel` | Nama produk |
+| 5 | `+ cart_item_price` | `JLabel` | Harga per unit |
+| 6 | `+ quantity` | `JSpinner` | Input jumlah |
+| 7 | `+ btnUpdate` | `JButton` | Tombol update quantity |
+| 8 | `+ btnRemove` | `JButton` | Tombol hapus item |
+| 9 | `+ subtotal` | `JLabel` | Subtotal per item |
+| 10 | `+ summary_subtotal` | `JLabel` | Total subtotal |
+| 11 | `+ summary_admin_fee` | `JLabel` | Biaya admin |
+| 12 | `+ summary_shipping` | `JLabel` | Ongkos kirim |
+| 13 | `+ summary_total` | `JLabel` | Total pembayaran |
+| 14 | `+ btnCheckout` | `JButton` | Tombol ke checkout |
+| 15 | `+ btnContinue` | `JButton` | Tombol lanjut belanja |
+
+**Functions:** *Tidak ada JavaScript function*
+
+---
+
+## 5.5 CHECKOUT VIEWS
+
+### v_checkout_index (`checkout.index`)
+
+**Atribut**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ checkout_steps` | `JPanel` | Progress step (1-4) |
+| 2 | `+ shipping_address` | `JTextArea` | Input alamat pengiriman |
+| 3 | `+ phone` | `JTextField` | Input nomor telepon |
+| 4 | `+ notes` | `JTextArea` | Catatan untuk kurir |
+| 5 | `+ payment_method` | `JRadioButton` | Pilihan metode bayar |
+| 6 | `+ order_items` | `JPanel` | Daftar item pesanan |
+| 7 | `+ summary_subtotal` | `JLabel` | Subtotal |
+| 8 | `+ summary_admin_fee` | `JLabel` | Biaya admin |
+| 9 | `+ summary_shipping` | `JLabel` | Ongkos kirim |
+| 10 | `+ summary_total` | `JLabel` | Total pembayaran |
+| 11 | `+ btnOrder` | `JButton` | Tombol buat pesanan |
+
+**Functions:** *Tidak ada JavaScript function*
+
+---
+
+### v_checkout_payment (`checkout.payment`)
+
+**Atribut**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ checkout_steps` | `JPanel` | Progress step (1-4) |
+| 2 | `+ order_id` | `JLabel` | ID order |
+| 3 | `+ payment_method` | `JLabel` | Metode pembayaran |
+| 4 | `+ item_count` | `JLabel` | Jumlah produk |
+| 5 | `+ total_amount` | `JLabel` | Total pembayaran |
+| 6 | `+ demo_notice` | `JPanel` | Notifikasi mode demo |
+| 7 | `+ btnConfirm` | `JButton` | Tombol konfirmasi bayar |
+
+**Functions:** *Tidak ada JavaScript function*
+
+---
+
+### v_checkout_success (`checkout.success`)
+
+**Atribut**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ success_icon` | `JLabel` | Ikon sukses |
+| 2 | `+ success_message` | `JLabel` | Pesan sukses |
+| 3 | `+ order_id` | `JLabel` | ID order |
+| 4 | `+ btnViewOrder` | `JButton` | Tombol lihat pesanan |
+| 5 | `+ btnShop` | `JButton` | Tombol belanja lagi |
+
+**Functions:** *View statis*
+
+---
+
+## 5.6 PROFILE VIEWS
+
+### v_profile_index (`profile.index`)
+
+**Atribut (Pembeli)**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ profile_hero` | `JPanel` | Header profil dengan avatar |
+| 2 | `+ stat_total_orders` | `JLabel` | Total pesanan |
+| 3 | `+ stat_total_spent` | `JLabel` | Total belanja |
+| 4 | `+ stat_member_tier` | `JLabel` | Status member |
+| 5 | `+ name` | `JTextField` | Input nama |
+| 6 | `+ email` | `JTextField` | Input email |
+| 7 | `+ phone` | `JTextField` | Input telepon |
+| 8 | `+ address` | `JTextField` | Input alamat |
+| 9 | `+ btnSaveProfile` | `JButton` | Tombol simpan profil |
+| 10 | `+ current_password` | `JPasswordField` | Password lama |
+| 11 | `+ password` | `JPasswordField` | Password baru |
+| 12 | `+ password_confirmation` | `JPasswordField` | Konfirmasi password |
+| 13 | `+ btnChangePassword` | `JButton` | Tombol ubah password |
+| 14 | `+ order_history` | `JPanel` | Riwayat pesanan |
+
+**Atribut Tambahan (Khusus Pedagang)**
+| 15 | `+ store_name` | `JTextField` | Nama toko |
+| 16 | `+ store_description` | `JTextArea` | Deskripsi toko |
+| 17 | `+ store_logo` | `JFileChooser` | Upload logo toko |
+| 18 | `+ btnSaveStore` | `JButton` | Tombol simpan toko |
+
+**Functions:** *Tidak ada JavaScript function*
+
+---
+
+## 5.7 PEMBELI VIEWS
+
+### v_pembeli_orders_index (`pembeli.orders.index`)
+
+**Atribut**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ orders_list` | `JPanel` | Daftar pesanan |
+| 2 | `+ order_card` | `JPanel` | Kartu pesanan |
+| 3 | `+ order_id` | `JLabel` | ID order |
+| 4 | `+ order_date` | `JLabel` | Tanggal order |
+| 5 | `+ order_status` | `JBadge` | Status order |
+| 6 | `+ order_total` | `JLabel` | Total pembayaran |
+| 7 | `+ order_items` | `JPanel` | Item dalam order |
+| 8 | `+ btnViewDetail` | `JButton` | Tombol lihat detail |
+
+**Functions:** *View statis*
+
+---
+
+### v_pembeli_orders_show (`pembeli.orders.show`)
+
+**Atribut**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ order_header` | `JPanel` | Header order |
+| 2 | `+ order_id` | `JLabel` | ID order |
+| 3 | `+ order_status` | `JBadge` | Status order |
+| 4 | `+ shipping_address` | `JLabel` | Alamat pengiriman |
+| 5 | `+ order_items` | `JPanel` | Daftar item |
+| 6 | `+ order_total` | `JLabel` | Total pembayaran |
+| 7 | `+ btnConfirmDelivery` | `JButton` | Konfirmasi terima pesanan |
+| 8 | `+ btnPayNow` | `JButton` | Bayar sekarang (jika pending) |
+| 9 | `+ rating` | `JRadioButton` | Input rating (1-5) |
+| 10 | `+ comment` | `JTextArea` | Input komentar review |
+| 11 | `+ btnSubmitReview` | `JButton` | Tombol kirim review |
+| 12 | `+ btnCreateReturn` | `JButton` | Tombol ajukan return |
+
+**Functions:** *Tidak ada JavaScript function*
+
+---
+
+### v_pembeli_orders_return (`pembeli.orders.return`)
+
+**Atribut**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ order_info` | `JPanel` | Informasi order |
+| 2 | `+ reason` | `JTextArea` | Alasan return |
+| 3 | `+ type` | `JRadioButton` | Tipe return (replacement/refund) |
+| 4 | `+ evidence` | `JFileChooser` | Upload bukti kerusakan |
+| 5 | `+ btnSubmitReturn` | `JButton` | Tombol kirim request return |
+
+**Functions:** *Tidak ada JavaScript function*
+
+---
+
+## 5.8 PEDAGANG VIEWS
+
+### v_pedagang_dashboard (`pedagang.dashboard`)
+
+**Atribut**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ stat_revenue_total` | `JLabel` | Total pendapatan |
+| 2 | `+ stat_revenue_today` | `JLabel` | Pendapatan hari ini |
+| 3 | `+ stat_revenue_week` | `JLabel` | Pendapatan minggu ini |
+| 4 | `+ stat_revenue_month` | `JLabel` | Pendapatan bulan ini |
+| 5 | `+ stat_products` | `JLabel` | Jumlah produk |
+| 6 | `+ stat_active_products` | `JLabel` | Produk aktif |
+| 7 | `+ stat_low_stock` | `JLabel` | Produk stok rendah |
+| 8 | `+ stat_out_of_stock` | `JLabel` | Produk habis |
+| 9 | `+ chart_daily_revenue` | `JChart` | Grafik pendapatan harian |
+| 10 | `+ chart_monthly_revenue` | `JChart` | Grafik pendapatan bulanan |
+| 11 | `+ recent_orders` | `JTable` | Tabel pesanan terbaru |
+| 12 | `+ top_products` | `JTable` | Tabel produk terlaris |
+| 13 | `+ low_stock_products` | `JTable` | Produk stok rendah |
+
+**Functions:** *Chart menggunakan Chart.js*
+
+---
+
+### v_pedagang_products_index (`pedagang.products.index`)
+
+**Atribut**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ search` | `JTextField` | Input pencarian |
+| 2 | `+ category` | `JComboBox` | Filter kategori |
+| 3 | `+ products_table` | `JTable` | Tabel produk |
+| 4 | `+ btnAddProduct` | `JButton` | Tombol tambah produk |
+| 5 | `+ btnEdit` | `JButton` | Tombol edit produk |
+| 6 | `+ btnDelete` | `JButton` | Tombol hapus produk |
+| 7 | `+ pagination` | `JPanel` | Navigasi halaman |
+
+**Functions**
+| No | Nama Function | Deskripsi |
+|----|---------------|-----------|
+| 1 | `+ confirmDelete()` | Konfirmasi hapus produk |
+
+---
+
+### v_pedagang_products_create (`pedagang.products.create`)
+
+**Atribut**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ name` | `JTextField` | Nama produk |
+| 2 | `+ description` | `JTextArea` | Deskripsi produk |
+| 3 | `+ price` | `JTextField` | Harga produk |
+| 4 | `+ stock` | `JSpinner` | Jumlah stok |
+| 5 | `+ category` | `JComboBox` | Kategori produk |
+| 6 | `+ image` | `JFileChooser` | Upload gambar produk |
+| 7 | `+ is_active` | `JCheckBox` | Status aktif |
+| 8 | `+ btnSave` | `JButton` | Tombol simpan |
+| 9 | `+ btnCancel` | `JButton` | Tombol batal |
+
+**Functions**
+| No | Nama Function | Deskripsi |
+|----|---------------|-----------|
+| 1 | `+ previewImage()` | Preview gambar sebelum upload |
+
+---
+
+### v_pedagang_orders_index (`pedagang.orders.index`)
+
+**Atribut**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ status_filter` | `JComboBox` | Filter status |
+| 2 | `+ search` | `JTextField` | Pencarian order |
+| 3 | `+ orders_table` | `JTable` | Tabel pesanan |
+| 4 | `+ btnProcess` | `JButton` | Tombol proses order |
+| 5 | `+ btnDetail` | `JButton` | Tombol lihat detail |
+
+**Functions:** *Tidak ada JavaScript function*
+
+---
+
+### v_pedagang_orders_show (`pedagang.orders.show`)
+
+**Atribut**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ order_info` | `JPanel` | Informasi order |
+| 2 | `+ customer_info` | `JPanel` | Informasi pembeli |
+| 3 | `+ order_items` | `JTable` | Daftar item |
+| 4 | `+ kurir_id` | `JComboBox` | Pilih kurir |
+| 5 | `+ btnProcess` | `JButton` | Tombol proses order |
+| 6 | `+ btnReadyPickup` | `JButton` | Tombol siap pickup |
+
+**Functions:** *Tidak ada JavaScript function*
+
+---
+
+### v_pedagang_returns_show (`pedagang.returns.show`)
+
+**Atribut**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ return_info` | `JPanel` | Informasi return |
+| 2 | `+ evidence_image` | `JImage` | Bukti kerusakan |
+| 3 | `+ kurir_id` | `JComboBox` | Pilih kurir (untuk pickup) |
+| 4 | `+ admin_notes` | `JTextArea` | Catatan admin (untuk reject) |
+| 5 | `+ replacement_kurir_id` | `JComboBox` | Pilih kurir pengganti |
+| 6 | `+ refund_proof` | `JFileChooser` | Upload bukti refund |
+| 7 | `+ btnApprove` | `JButton` | Tombol setujui |
+| 8 | `+ btnReject` | `JButton` | Tombol tolak |
+| 9 | `+ btnSendReplacement` | `JButton` | Tombol kirim barang pengganti |
+| 10 | `+ btnSendRefund` | `JButton` | Tombol kirim refund |
+
+**Functions:** *Tidak ada JavaScript function*
+
+---
+
+## 5.9 KURIR VIEWS
+
+### v_kurir_dashboard (`kurir.dashboard`)
+
+**Atribut**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ stat_pending_pickup` | `JLabel` | Pesanan siap diambil |
+| 2 | `+ stat_in_delivery` | `JLabel` | Pesanan dalam pengiriman |
+| 3 | `+ stat_completed_today` | `JLabel` | Selesai hari ini |
+| 4 | `+ stat_total_completed` | `JLabel` | Total selesai |
+| 5 | `+ stat_total_earnings` | `JLabel` | Total pendapatan |
+| 6 | `+ stat_earnings_today` | `JLabel` | Pendapatan hari ini |
+| 7 | `+ stat_returns` | `JLabel` | Return aktif |
+| 8 | `+ pending_pickups` | `JTable` | Tabel pesanan siap pickup |
+| 9 | `+ in_delivery` | `JTable` | Tabel pesanan dalam kirim |
+
+**Functions:** *View statis*
+
+---
+
+### v_kurir_deliveries_index (`kurir.deliveries.index`)
+
+**Atribut**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ status_filter` | `JComboBox` | Filter status |
+| 2 | `+ deliveries_list` | `JPanel` | Daftar pengiriman |
+| 3 | `+ delivery_card` | `JPanel` | Kartu pengiriman |
+| 4 | `+ btnPickup` | `JButton` | Tombol ambil pesanan |
+| 5 | `+ btnDeliver` | `JButton` | Tombol antar pesanan |
+| 6 | `+ btnDetail` | `JButton` | Tombol lihat detail |
+
+**Functions:** *Tidak ada JavaScript function*
+
+---
+
+### v_kurir_returns_show (`kurir.returns.show`)
+
+**Atribut**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ return_info` | `JPanel` | Informasi return |
+| 2 | `+ customer_address` | `JLabel` | Alamat pembeli |
+| 3 | `+ store_address` | `JLabel` | Alamat toko |
+| 4 | `+ btnPickup` | `JButton` | Tombol ambil dari pembeli |
+| 5 | `+ btnDeliver` | `JButton` | Tombol antar ke pedagang |
+| 6 | `+ btnDeliverReplacement` | `JButton` | Tombol antar barang pengganti |
+
+**Functions:** *Tidak ada JavaScript function*
+
+---
+
+## 5.10 ADMIN VIEWS
+
+### v_admin_dashboard (`admin.dashboard`)
+
+**Atribut**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ stat_total_pembeli` | `JLabel` | Jumlah pembeli |
+| 2 | `+ stat_total_pedagang` | `JLabel` | Jumlah pedagang |
+| 3 | `+ stat_total_kurir` | `JLabel` | Jumlah kurir |
+| 4 | `+ stat_total_products` | `JLabel` | Jumlah produk |
+| 5 | `+ stat_total_orders` | `JLabel` | Jumlah pesanan |
+| 6 | `+ stat_total_revenue` | `JLabel` | Total pendapatan |
+| 7 | `+ stat_admin_revenue` | `JLabel` | Pendapatan admin |
+| 8 | `+ stat_pending_approvals` | `JLabel` | User menunggu approval |
+| 9 | `+ chart_orders_by_status` | `JChart` | Grafik order per status |
+| 10 | `+ chart_daily_sales` | `JChart` | Grafik penjualan harian |
+| 11 | `+ recent_orders` | `JTable` | Tabel pesanan terbaru |
+| 12 | `+ low_stock_products` | `JTable` | Produk stok rendah |
+| 13 | `+ pending_users` | `JTable` | User menunggu approval |
+
+**Functions:** *Chart menggunakan Chart.js*
+
+---
+
+### v_admin_users_index (`admin.users.index`)
+
+**Atribut**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ role_filter` | `JComboBox` | Filter role |
+| 2 | `+ approved_filter` | `JComboBox` | Filter status approval |
+| 3 | `+ search` | `JTextField` | Pencarian user |
+| 4 | `+ users_table` | `JTable` | Tabel user |
+| 5 | `+ btnAddUser` | `JButton` | Tombol tambah user |
+| 6 | `+ btnEdit` | `JButton` | Tombol edit user |
+| 7 | `+ btnDelete` | `JButton` | Tombol hapus user |
+| 8 | `+ btnApprove` | `JButton` | Tombol setujui user |
+| 9 | `+ btnReject` | `JButton` | Tombol tolak user |
+
+**Functions**
+| No | Nama Function | Deskripsi |
+|----|---------------|-----------|
+| 1 | `+ confirmDelete()` | Konfirmasi hapus user |
+| 2 | `+ loadUserData()` | Load data user untuk edit (AJAX) |
+
+---
+
+### v_admin_users_create (`admin.users.create`)
+
+**Atribut**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ name` | `JTextField` | Nama user |
+| 2 | `+ email` | `JTextField` | Email user |
+| 3 | `+ password` | `JPasswordField` | Password |
+| 4 | `+ password_confirmation` | `JPasswordField` | Konfirmasi password |
+| 5 | `+ role` | `JComboBox` | Role user |
+| 6 | `+ phone` | `JTextField` | Nomor telepon |
+| 7 | `+ address` | `JTextArea` | Alamat |
+| 8 | `+ is_approved` | `JCheckBox` | Status approval |
+| 9 | `+ btnSave` | `JButton` | Tombol simpan |
+| 10 | `+ btnCancel` | `JButton` | Tombol batal |
+
+**Functions:** *Tidak ada JavaScript function*
+
+---
+
+### v_admin_reviews_index (`admin.reviews.index`)
+
+**Atribut**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ stat_total` | `JLabel` | Total review |
+| 2 | `+ stat_average` | `JLabel` | Rating rata-rata |
+| 3 | `+ stat_count_5` | `JLabel` | Rating 5 |
+| 4 | `+ stat_count_4` | `JLabel` | Rating 4 |
+| 5 | `+ stat_count_3` | `JLabel` | Rating 3 |
+| 6 | `+ stat_count_2` | `JLabel` | Rating 2 |
+| 7 | `+ stat_count_1` | `JLabel` | Rating 1 |
+| 8 | `+ rating_filter` | `JComboBox` | Filter rating |
+| 9 | `+ product_filter` | `JComboBox` | Filter produk |
+| 10 | `+ reviews_list` | `JPanel` | Daftar review |
+
+**Functions:** *View statis*
+
+---
+
+## 5.11 RINGKASAN VIEW
+
+| Bagian | Jumlah Views | Atribut | Functions |
+|--------|:------------:|:-------:|:---------:|
+| Auth | 2 | 14 | 0 |
+| General | 1 | 9 | 0 |
+| Shop | 2 | 25 | 2 |
+| Cart | 1 | 15 | 0 |
+| Checkout | 3 | 23 | 0 |
+| Profile | 2 | 18 | 0 |
+| Pembeli | 3 | 20 | 0 |
+| Pedagang | 12 | ~60 | 2 |
+| Kurir | 7 | ~30 | 0 |
+| Admin | 14 | ~55 | 2 |
+| **TOTAL** | **51** | **~270** | **6** |
+
+### JavaScript Functions yang Ditemukan
+
+| No | View | Function | Deskripsi |
+|----|------|----------|-----------|
+| 1 | `shop.show` | `decreaseQty()` | Kurangi quantity |
+| 2 | `shop.show` | `increaseQty(max)` | Tambah quantity |
+| 3 | `pedagang.products.index` | `confirmDelete()` | Konfirmasi hapus produk |
+| 4 | `pedagang.products.create` | `previewImage()` | Preview gambar |
+| 5 | `admin.users.index` | `confirmDelete()` | Konfirmasi hapus user |
+| 6 | `admin.users.index` | `loadUserData()` | Load data AJAX |
+
+---
+
+# BAGIAN 6: RINGKASAN KESELURUHAN
+
+| Komponen | Jumlah |
+|----------|:------:|
+| **Tabel Database** | 14 |
+| **Views** | 51 |
+| **Atribut View** | ~270 |
+| **Functions View** | 6 |
+| **Models** | 7 |
+| **Controllers** | 23 |
+| **Methods** | 82 |
+| **Atribut Model** | 62 |
+| **Functions Model** | 38 |
+
+---
+
+**Dokumentasi ini dibuat secara otomatis dari source code project Peukan Rumoh.**  
+**Tanggal Pembuatan:** 27 Desember 2024
