@@ -320,6 +320,12 @@
             <p class="form-subtitle">Masuk ke akun Anda untuk melanjutkan</p>
         </div>
         
+        @if(session('success'))
+            <div style="background: #d1fae5; border: 1px solid #a7f3d0; color: #065f46; padding: 0.75rem 1rem; border-radius: 10px; margin-bottom: 1.25rem; font-size: 0.85rem;">
+                ✓ {{ session('success') }}
+            </div>
+        @endif
+        
         @if($errors->any())
             <div class="alert-box">
                 @foreach($errors->all() as $error)
@@ -346,6 +352,7 @@
             <div class="remember-row">
                 <input type="checkbox" id="remember" name="remember" class="checkbox-custom">
                 <label for="remember" class="remember-label">Ingat saya</label>
+                <a href="{{ route('password.request') }}" style="margin-left: auto; color: #059669; font-size: 0.85rem; text-decoration: none; font-weight: 600;">Lupa Password?</a>
             </div>
             
             <button type="submit" class="btn-login">🔐 Masuk</button>
