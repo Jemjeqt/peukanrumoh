@@ -495,14 +495,14 @@
                                 <div class="cart-item-price">Rp {{ number_format($item->product->price, 0, ',', '.') }} / unit</div>
                                 
                                 <div class="cart-item-actions">
-                                    <form action="{{ route('cart.update', $item) }}" method="POST" class="qty-control">
+                                    <form action="{{ route('cart.update', $item) }}" method="POST" class="qty-control ajax-cart-form" data-item-id="{{ $item->id }}" data-price="{{ $item->product->price }}">
                                         @csrf
                                         <input type="number" name="quantity" value="{{ $item->quantity }}" 
                                                min="1" max="{{ $item->product->stock }}" class="qty-input">
                                         <button type="submit" class="btn-qty-update">Update</button>
                                     </form>
                                     
-                                    <form action="{{ route('cart.remove', $item) }}" method="POST">
+                                    <form action="{{ route('cart.remove', $item) }}" method="POST" class="ajax-remove-form">
                                         @csrf
                                         <button type="submit" class="btn-remove" title="Hapus">
                                             🗑️
@@ -511,7 +511,7 @@
                                 </div>
                             </div>
                             
-                            <div class="cart-item-subtotal">
+                            <div class="cart-item-subtotal" data-item-id="{{ $item->id }}">
                                 <div class="subtotal-label">Subtotal</div>
                                 <div class="subtotal-amount">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</div>
                             </div>
@@ -526,8 +526,8 @@
                     </div>
                     <div class="summary-body">
                         <div class="summary-line">
-                            <span>Subtotal ({{ $cartItems->sum('quantity') }} item)</span>
-                            <span>Rp {{ number_format($total, 0, ',', '.') }}</span>
+                            <span>Subtotal (<span id="total-items">{{ $cartItems->sum('quantity') }}</span> item)</span>
+                            <span id="summary-subtotal">Rp {{ number_format($total, 0, ',', '.') }}</span>
                         </div>
                         <div class="summary-line subtle">
                             <span>Biaya Admin</span>
@@ -542,7 +542,7 @@
                         
                         <div class="summary-total">
                             <span>Total</span>
-                            <span class="amount">Rp {{ number_format($total + \App\Models\Order::ADMIN_FEE + \App\Models\Order::SHIPPING_COST, 0, ',', '.') }}</span>
+                            <span class="amount" id="summary-total">Rp {{ number_format($total + \App\Models\Order::ADMIN_FEE + \App\Models\Order::SHIPPING_COST, 0, ',', '.') }}</span>
                         </div>
                         
                         <a href="{{ route('checkout.index') }}" class="btn-checkout">
@@ -573,3 +573,141 @@
     </div>
 </div>
 @endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const adminFee = {{ \App\Models\Order::ADMIN_FEE }};
+    const shippingCost = {{ \App\Models\Order::SHIPPING_COST }};
+    
+    // SweetAlert2 Toast
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true
+    });
+    
+    // Update quantity forms
+    document.querySelectorAll('.ajax-cart-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const btn = form.querySelector('.btn-qty-update');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '...';
+            btn.disabled = true;
+            
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                },
+                body: new FormData(form)
+            })
+            .then(() => {
+                // Update subtotal display
+                const itemId = form.dataset.itemId;
+                const price = parseFloat(form.dataset.price);
+                const qty = parseInt(form.querySelector('.qty-input').value);
+                const subtotal = price * qty;
+                
+                const subtotalEl = document.querySelector(`.cart-item-subtotal[data-item-id="${itemId}"] .subtotal-amount`);
+                if (subtotalEl) {
+                    subtotalEl.textContent = 'Rp ' + subtotal.toLocaleString('id-ID');
+                }
+                
+                updateTotals();
+                Toast.fire({ icon: 'success', title: 'Jumlah berhasil diupdate!' });
+                
+                btn.innerHTML = '✓';
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }, 1000);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                Toast.fire({ icon: 'error', title: 'Gagal update' });
+            });
+        });
+    });
+    
+    // Remove item forms
+    document.querySelectorAll('.ajax-remove-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            Swal.fire({
+                title: 'Hapus Item?',
+                text: 'Item ini akan dihapus dari keranjang',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const cartItem = form.closest('.cart-item');
+                    
+                    fetch(form.action, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'Accept': 'application/json'
+                        },
+                        body: new FormData(form)
+                    })
+                    .then(() => {
+                        cartItem.style.transition = 'all 0.3s ease';
+                        cartItem.style.opacity = '0';
+                        cartItem.style.transform = 'translateX(-20px)';
+                        
+                        setTimeout(() => {
+                            cartItem.remove();
+                            updateTotals();
+                            
+                            if (document.querySelectorAll('.cart-item').length === 0) {
+                                location.reload();
+                            }
+                        }, 300);
+                        
+                        Toast.fire({ icon: 'success', title: 'Item dihapus dari keranjang' });
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Toast.fire({ icon: 'error', title: 'Gagal menghapus' });
+                    });
+                }
+            });
+        });
+    });
+    
+    function updateTotals() {
+        let subtotal = 0;
+        let totalItems = 0;
+        
+        document.querySelectorAll('.ajax-cart-form').forEach(form => {
+            const price = parseFloat(form.dataset.price);
+            const qty = parseInt(form.querySelector('.qty-input').value);
+            subtotal += price * qty;
+            totalItems += qty;
+        });
+        
+        const total = subtotal + adminFee + shippingCost;
+        
+        document.getElementById('total-items').textContent = totalItems;
+        document.getElementById('summary-subtotal').textContent = 'Rp ' + subtotal.toLocaleString('id-ID');
+        document.getElementById('summary-total').textContent = 'Rp ' + total.toLocaleString('id-ID');
+    }
+    
+
+});
+</script>
+@endsection
+

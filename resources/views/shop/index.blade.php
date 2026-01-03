@@ -156,14 +156,17 @@
     
     .product-badge {
         position: absolute;
-        top: 12px;
-        left: 12px;
+        top: 10px;
+        left: 10px;
         background: linear-gradient(135deg, #ff6b35, #f7931e);
         color: white;
-        padding: 0.3rem 0.75rem;
-        border-radius: 20px;
-        font-size: 0.7rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.65rem;
         font-weight: 600;
+        z-index: 5;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        white-space: nowrap;
     }
     
     .product-info {
@@ -356,7 +359,7 @@
                                 </span>
                             </div>
                             <div class="product-actions">
-                                <form action="{{ route('cart.add', $product) }}" method="POST">
+                                <form action="{{ route('cart.add', $product) }}" method="POST" class="ajax-cart-form">
                                     @csrf
                                     <button type="submit" class="add-cart-btn">🛒 + Keranjang</button>
                                 </form>
@@ -379,3 +382,60 @@
     </div>
 </div>
 @endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const forms = document.querySelectorAll('.ajax-cart-form');
+    
+    // SweetAlert2 Toast
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true
+    });
+    
+    forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const btn = form.querySelector('.add-cart-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Menambahkan...';
+            btn.disabled = true;
+            
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: new FormData(form)
+            })
+            .then(() => {
+                btn.innerHTML = '✓ Ditambahkan!';
+                btn.style.background = 'linear-gradient(135deg, #059669, #10b981)';
+                Toast.fire({ icon: 'success', title: 'Berhasil ditambahkan ke keranjang!' });
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.background = '';
+                    btn.disabled = false;
+                }, 1500);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                Toast.fire({ icon: 'error', title: 'Gagal menambahkan ke keranjang' });
+            });
+        });
+    });
+});
+</script>
+@endsection
+
+

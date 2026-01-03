@@ -7,6 +7,7 @@
     <title>@yield('title', 'Peukan Rumoh') - Pasar Online Terpercaya</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
         :root {
@@ -440,6 +441,24 @@
         
         .pagination svg {
             display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            visibility: hidden !important;
+        }
+        
+        .pagination [rel="prev"],
+        .pagination [rel="next"] {
+            font-size: 0;
+        }
+        
+        .pagination [rel="prev"]::after {
+            content: '‹ Prev';
+            font-size: 13px;
+        }
+        
+        .pagination [rel="next"]::before {
+            content: 'Next ›';
+            font-size: 13px;
         }
         
         .page-item {

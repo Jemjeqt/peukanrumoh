@@ -568,7 +568,7 @@
                 @endif
                 
                 @if($product->stock > 0)
-                    <form action="{{ route('cart.add', $product) }}" method="POST">
+                    <form action="{{ route('cart.add', $product) }}" method="POST" id="addToCartForm">
                         @csrf
                         <!-- Quantity -->
                         <div class="quantity-section">
@@ -583,7 +583,7 @@
                         
                         <!-- Action Buttons -->
                         <div class="action-buttons">
-                            <button type="submit" class="btn-add-cart">🛒 Tambah ke Keranjang</button>
+                            <button type="submit" class="btn-add-cart" id="addToCartBtn">🛒 Tambah ke Keranjang</button>
                             <a href="{{ route('shop.index') }}" class="btn-back">← Kembali</a>
                         </div>
                     </form>
@@ -688,5 +688,58 @@ function increaseQty(max) {
         input.value = parseInt(input.value) + 1;
     }
 }
+
+// AJAX Add to Cart
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('addToCartForm');
+    const btn = document.getElementById('addToCartBtn');
+    
+    // SweetAlert2 Toast
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true
+    });
+    
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Menambahkan...';
+            btn.disabled = true;
+            
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                },
+                body: new FormData(form)
+            })
+            .then(() => {
+                btn.innerHTML = '✓ Ditambahkan ke Keranjang!';
+                btn.style.background = 'linear-gradient(135deg, #059669, #10b981)';
+                Toast.fire({ icon: 'success', title: 'Berhasil ditambahkan ke keranjang!' });
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.background = '';
+                    btn.disabled = false;
+                }, 2000);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                Toast.fire({ icon: 'error', title: 'Gagal menambahkan' });
+            });
+        });
+    }
+});
 </script>
 @endsection
+
+

@@ -288,9 +288,9 @@
                                     <a href="{{ route('checkout.pay-order', $order) }}" class="btn-pay">💳 Bayar</a>
                                 @endif
                                 @if($order->status === 'delivered')
-                                    <form action="{{ route('pembeli.orders.confirm-delivery', $order) }}" method="POST">
+                                    <form action="{{ route('pembeli.orders.confirm-delivery', $order) }}" method="POST" class="ajax-confirm-form">
                                         @csrf
-                                        <button type="submit" class="btn-confirm">✅ Konfirmasi</button>
+                                        <button type="submit" class="btn-confirm ajax-btn">✅ Konfirmasi</button>
                                     </form>
                                 @endif
                                 <a href="{{ route('pembeli.orders.show', $order) }}" class="btn-detail">Lihat Detail →</a>
@@ -313,4 +313,73 @@
         </div>
     </div>
 </div>
+
+<!-- Toast Notification -->
+<div id="toast" style="position: fixed; bottom: 20px; right: 20px; background: linear-gradient(135deg, #11998e, #38ef7d); color: white; padding: 1rem 1.5rem; border-radius: 12px; font-weight: 600; box-shadow: 0 8px 30px rgba(0,0,0,0.2); z-index: 9999; transform: translateY(100px); opacity: 0; transition: all 0.3s ease;">
+    <span id="toast-message">Berhasil!</span>
+</div>
 @endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toast-message');
+    
+    document.querySelectorAll('.ajax-confirm-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const btn = form.querySelector('.ajax-btn');
+            const card = form.closest('.order-item-card');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳';
+            btn.disabled = true;
+            
+            fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                },
+                body: new FormData(form)
+            })
+            .then(() => {
+                card.style.transition = 'all 0.3s ease';
+                card.style.background = '#d1fae5';
+                
+                const badge = card.querySelector('.status-badge');
+                if (badge) {
+                    badge.innerHTML = '✅ Selesai';
+                    badge.className = 'status-badge completed';
+                }
+                
+                form.remove();
+                showToast('Pesanan dikonfirmasi! Terima kasih 🎉');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                showToast('Gagal konfirmasi', true);
+            });
+        });
+    });
+    
+    function showToast(message, isError = false) {
+        toastMessage.textContent = message;
+        toast.style.background = isError 
+            ? 'linear-gradient(135deg, #dc2626, #ef4444)' 
+            : 'linear-gradient(135deg, #11998e, #38ef7d)';
+        toast.style.transform = 'translateY(0)';
+        toast.style.opacity = '1';
+        
+        setTimeout(() => {
+            toast.style.transform = 'translateY(100px)';
+            toast.style.opacity = '0';
+        }, 2500);
+    }
+});
+</script>
+@endsection
+
