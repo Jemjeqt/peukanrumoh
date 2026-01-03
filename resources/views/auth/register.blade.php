@@ -357,6 +357,10 @@
         
         <!-- Right - Form -->
         <div class="register-form">
+            <a href="{{ route('welcome') }}" style="display: inline-flex; align-items: center; gap: 0.5rem; color: #11998e; text-decoration: none; font-weight: 600; margin-bottom: 1rem; font-size: 0.9rem;">
+                ← Kembali ke Beranda
+            </a>
+            
             <div class="form-header">
                 <h2 class="form-title">Buat Akun Baru ✨</h2>
                 <p class="form-subtitle">Isi data diri Anda untuk mendaftar</p>
