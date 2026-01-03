@@ -420,6 +420,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 btn.style.background = 'linear-gradient(135deg, #059669, #10b981)';
                 Toast.fire({ icon: 'success', title: 'Berhasil ditambahkan ke keranjang!' });
                 
+                // Update cart badge
+                const cartBadge = document.getElementById('cart-badge');
+                if (cartBadge) {
+                    let count = parseInt(cartBadge.textContent) || 0;
+                    cartBadge.textContent = count + 1;
+                    cartBadge.style.display = '';
+                }
+                
                 setTimeout(() => {
                     btn.innerHTML = originalText;
                     btn.style.background = '';

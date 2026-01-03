@@ -112,9 +112,7 @@
                             @php
                                 $cartCount = \App\Models\Cart::where('user_id', auth()->id())->count();
                             @endphp
-                            @if($cartCount > 0)
-                                <span class="nav-badge">{{ $cartCount }}</span>
-                            @endif
+                            <span class="nav-badge" id="cart-badge" style="{{ $cartCount == 0 ? 'display:none;' : '' }}">{{ $cartCount }}</span>
                         </a>
                         <a href="{{ route('pembeli.orders.index') }}" class="nav-link {{ request()->routeIs('pembeli.orders.*') ? 'active' : '' }}">
                             📦 Pesanan
@@ -129,9 +127,7 @@
                                     ->count();
                                 $totalNotif = $orderCount + $returnCount;
                             @endphp
-                            @if($totalNotif > 0)
-                                <span class="nav-badge">{{ $totalNotif }}</span>
-                            @endif
+                            <span class="nav-badge" id="order-badge" style="{{ $totalNotif == 0 ? 'display:none;' : '' }}">{{ $totalNotif }}</span>
                         </a>
                         <a href="{{ route('profile.index') }}" class="nav-link {{ request()->routeIs('profile.*') ? 'active' : '' }}">
                             👤 Akun

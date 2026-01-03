@@ -354,14 +354,50 @@ document.addEventListener('DOMContentLoaded', function() {
                     badge.className = 'status-badge completed';
                 }
                 
+                // Update order badge in navbar
+                const orderBadge = document.getElementById('order-badge');
+                if (orderBadge) {
+                    let count = parseInt(orderBadge.textContent) || 0;
+                    count = Math.max(0, count - 1);
+                    orderBadge.textContent = count;
+                    if (count === 0) {
+                        orderBadge.style.display = 'none';
+                    }
+                }
+                
                 form.remove();
-                showToast('Pesanan dikonfirmasi! Terima kasih 🎉');
+                
+                // Use SweetAlert2 Toast
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Pesanan dikonfirmasi! Terima kasih 🎉',
+                        showConfirmButton: false,
+                        timer: 2500,
+                        timerProgressBar: true
+                    });
+                } else {
+                    showToast('Pesanan dikonfirmasi! Terima kasih 🎉');
+                }
             })
             .catch(error => {
                 console.error('Error:', error);
                 btn.innerHTML = originalText;
                 btn.disabled = false;
-                showToast('Gagal konfirmasi', true);
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: 'Gagal konfirmasi',
+                        showConfirmButton: false,
+                        timer: 2500
+                    });
+                } else {
+                    showToast('Gagal konfirmasi', true);
+                }
             });
         });
     });
@@ -382,4 +418,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endsection
+
 
