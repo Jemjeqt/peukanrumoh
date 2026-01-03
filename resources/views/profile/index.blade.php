@@ -487,7 +487,7 @@
                     <div class="section-title">Edit Informasi Toko</div>
                     <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
                         @csrf
-                        @method('PUT')
+
                         <input type="hidden" name="name" value="{{ $user->name }}">
                         <input type="hidden" name="email" value="{{ $user->email }}">
                         <div class="form-group">
@@ -517,7 +517,7 @@
             <div class="card-body">
                 <form action="{{ route('profile.update') }}" method="POST">
                     @csrf
-                    @method('PUT')
+
                     <input type="hidden" name="store_name" value="{{ $user->store_name }}">
                     <div class="form-group">
                         <label class="form-label">Nama Lengkap</label>
@@ -549,7 +549,7 @@
             <div class="card-body">
                 <form action="{{ route('profile.password') }}" method="POST">
                     @csrf
-                    @method('PUT')
+
                     <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
                         <div class="form-group">
                             <label class="form-label">Password Lama</label>
@@ -580,7 +580,7 @@
             <div class="card-body">
                 <form action="{{ route('profile.update') }}" method="POST">
                     @csrf
-                    @method('PUT')
+
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">Nama Lengkap</label>
@@ -614,7 +614,7 @@
             <div class="card-body">
                 <form action="{{ route('profile.password') }}" method="POST">
                     @csrf
-                    @method('PUT')
+
                     <div class="form-group">
                         <label class="form-label">Password Lama</label>
                         <input type="password" name="current_password" class="form-input" required>
@@ -643,7 +643,7 @@
             <div class="card-body">
                 <form action="{{ route('profile.update') }}" method="POST">
                     @csrf
-                    @method('PUT')
+
                     <div class="form-row">
                         <div class="form-group">
                             <label class="form-label">Nama Lengkap</label>
@@ -677,7 +677,7 @@
             <div class="card-body">
                 <form action="{{ route('profile.password') }}" method="POST">
                     @csrf
-                    @method('PUT')
+
                     <div class="form-group">
                         <label class="form-label">Password Lama</label>
                         <input type="password" name="current_password" class="form-input" required>
@@ -764,7 +764,7 @@
                 <div class="card-body">
                     <form action="{{ route('profile.update') }}" method="POST">
                         @csrf
-                        @method('PUT')
+
                         <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label">Nama</label>
@@ -798,7 +798,7 @@
                 <div class="card-body">
                     <form action="{{ route('profile.password') }}" method="POST">
                         @csrf
-                        @method('PUT')
+
                         <div class="form-group">
                             <label class="form-label">Password Lama</label>
                             <input type="password" name="current_password" class="form-input" required>

@@ -44,7 +44,7 @@
         <div class="card-body">
             <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
                 @csrf
-                @method('PUT')
+
                 
                 <div class="form-group">
                     <label class="form-label">Nama Lengkap</label>
@@ -104,7 +104,7 @@
         <div class="card-body">
             <form action="{{ route('profile.password') }}" method="POST">
                 @csrf
-                @method('PUT')
+
                 
                 <div class="form-group">
                     <label class="form-label">Password Lama</label>

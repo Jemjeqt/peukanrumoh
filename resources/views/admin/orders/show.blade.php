@@ -785,7 +785,7 @@
             </div>
             <div class="info-card-body">
                 <form action="{{ route('admin.orders.status', $order) }}" method="POST" class="update-form">
-                    @csrf @method('PATCH')
+                    @csrf
                     <select name="status">
                         <option value="pending" {{ $order->status === 'pending' ? 'selected' : '' }}>⏳ Menunggu Bayar</option>
                         <option value="paid" {{ $order->status === 'paid' ? 'selected' : '' }}>💳 Sudah Dibayar</option>

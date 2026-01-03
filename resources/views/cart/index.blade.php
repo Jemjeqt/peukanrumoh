@@ -497,7 +497,6 @@
                                 <div class="cart-item-actions">
                                     <form action="{{ route('cart.update', $item) }}" method="POST" class="qty-control">
                                         @csrf
-                                        @method('PATCH')
                                         <input type="number" name="quantity" value="{{ $item->quantity }}" 
                                                min="1" max="{{ $item->product->stock }}" class="qty-input">
                                         <button type="submit" class="btn-qty-update">Update</button>
@@ -505,7 +504,6 @@
                                     
                                     <form action="{{ route('cart.remove', $item) }}" method="POST">
                                         @csrf
-                                        @method('DELETE')
                                         <button type="submit" class="btn-remove" title="Hapus">
                                             🗑️
                                         </button>
