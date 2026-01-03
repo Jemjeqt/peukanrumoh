@@ -69,8 +69,20 @@
                     </tbody>
                     <tfoot>
                         <tr>
+                            <td colspan="{{ $order->status === 'completed' ? 4 : 3 }}" style="text-align: right;">Subtotal:</td>
+                            <td>Rp {{ number_format($order->total, 0, ',', '.') }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="{{ $order->status === 'completed' ? 4 : 3 }}" style="text-align: right;">Ongkos Kirim:</td>
+                            <td>@if($order->shipping_cost > 0) Rp {{ number_format($order->shipping_cost, 0, ',', '.') }} @else <span style="color: #22c55e;">Gratis</span> @endif</td>
+                        </tr>
+                        <tr>
+                            <td colspan="{{ $order->status === 'completed' ? 4 : 3 }}" style="text-align: right;">Biaya Admin:</td>
+                            <td>@if($order->admin_fee > 0) Rp {{ number_format($order->admin_fee, 0, ',', '.') }} @else <span style="color: #22c55e;">Gratis</span> @endif</td>
+                        </tr>
+                        <tr style="background: #f8f9fa;">
                             <td colspan="{{ $order->status === 'completed' ? 4 : 3 }}" style="text-align: right; font-weight: 600;">Total:</td>
-                            <td style="font-weight: 700; color: var(--primary);">Rp {{ number_format($order->total, 0, ',', '.') }}</td>
+                            <td style="font-weight: 700; color: var(--primary);">Rp {{ number_format($order->total + $order->shipping_cost + $order->admin_fee, 0, ',', '.') }}</td>
                         </tr>
                     </tfoot>
                 </table>
@@ -102,9 +114,21 @@
                     </div>
                 </div>
                 <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #f0f0f0;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="color: #666;">Subtotal</span>
+                        <span>Rp {{ number_format($order->total, 0, ',', '.') }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="color: #666;">Ongkos Kirim</span>
+                        <span>@if($order->shipping_cost > 0) Rp {{ number_format($order->shipping_cost, 0, ',', '.') }} @else <span style="color: #22c55e;">Gratis</span> @endif</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
+                        <span style="color: #666;">Biaya Admin</span>
+                        <span>@if($order->admin_fee > 0) Rp {{ number_format($order->admin_fee, 0, ',', '.') }} @else <span style="color: #22c55e;">Gratis</span> @endif</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.5rem; border-top: 1px dashed #e0e0e0;">
                         <span style="font-size: 1rem; font-weight: 600;">Total Pembayaran</span>
-                        <span style="font-size: 1.25rem; font-weight: 700; color: var(--primary);">Rp {{ number_format($order->total, 0, ',', '.') }}</span>
+                        <span style="font-size: 1.25rem; font-weight: 700; color: var(--primary);">Rp {{ number_format($order->total + $order->shipping_cost + $order->admin_fee, 0, ',', '.') }}</span>
                     </div>
                 </div>
                 

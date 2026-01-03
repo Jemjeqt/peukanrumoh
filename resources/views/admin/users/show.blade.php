@@ -542,7 +542,7 @@
                     
                     @if(!$user->is_approved)
                     <form action="{{ route('admin.users.approve', $user) }}" method="POST">
-                        @csrf @method('PATCH')
+                        @csrf
                         <button type="submit" class="btn-action btn-approve" style="width: 100%;">
                             ✓ Approve User
                         </button>

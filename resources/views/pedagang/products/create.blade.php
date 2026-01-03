@@ -447,7 +447,7 @@
                         <div class="image-upload-zone" onclick="document.getElementById('imageInput').click()">
                             <div class="upload-icon">📷</div>
                             <div class="upload-text">Klik untuk upload gambar</div>
-                            <div class="upload-hint">Format: JPEG, PNG, JPG, GIF. Maks: 2MB</div>
+                            <div class="upload-hint">Format: JPEG, PNG, JPG, GIF. Maks: 10MB</div>
                             <div id="imagePreview"></div>
                         </div>
                         <input type="file" id="imageInput" name="image" accept="image/*" 

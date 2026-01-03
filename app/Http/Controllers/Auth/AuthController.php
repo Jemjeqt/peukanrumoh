@@ -24,9 +24,20 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
-
             $user = Auth::user();
+
+            // Check if pedagang/kurir needs approval
+            if (in_array($user->role, ['pedagang', 'kurir']) && !$user->is_approved) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                
+                return back()->withErrors([
+                    'email' => 'Akun ' . ucfirst($user->role) . ' Anda belum diverifikasi oleh Admin. Silakan tunggu persetujuan.',
+                ])->onlyInput('email');
+            }
+
+            $request->session()->regenerate();
 
             // Redirect based on role
             if ($user->isAdmin()) {

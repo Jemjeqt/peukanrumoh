@@ -259,14 +259,18 @@ classDiagram
         +int user_id
         +int kurir_id
         +decimal total
+        +decimal shipping_cost
         +decimal admin_fee
         +string status
         +string payment_method
         +string shipping_address
         +string phone
+        +string notes
         +datetime paid_at
+        +datetime picked_up_at
         +datetime delivered_at
         +getStatusLabel() string
+        +getGrandTotal() decimal
     }
     
     class OrderItem {

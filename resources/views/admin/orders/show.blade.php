@@ -586,7 +586,7 @@
                 <span class="hero-stat-label">Total Item</span>
             </div>
             <div class="hero-stat">
-                <span class="hero-stat-value">Rp {{ number_format($order->total, 0, ',', '.') }}</span>
+                <span class="hero-stat-value">Rp {{ number_format($order->total + $order->shipping_cost + $order->admin_fee, 0, ',', '.') }}</span>
                 <span class="hero-stat-label">Total Bayar</span>
             </div>
             <div class="hero-stat">
@@ -667,11 +667,23 @@
                 </div>
                 <div class="summary-row">
                     <span>Ongkos Kirim</span>
-                    <span style="color: #22c55e;">Gratis</span>
+                    @if($order->shipping_cost > 0)
+                        <span>Rp {{ number_format($order->shipping_cost, 0, ',', '.') }}</span>
+                    @else
+                        <span style="color: #22c55e;">Gratis</span>
+                    @endif
+                </div>
+                <div class="summary-row">
+                    <span>Biaya Admin</span>
+                    @if($order->admin_fee > 0)
+                        <span>Rp {{ number_format($order->admin_fee, 0, ',', '.') }}</span>
+                    @else
+                        <span style="color: #22c55e;">Gratis</span>
+                    @endif
                 </div>
                 <div class="summary-row total">
                     <span>Total Pembayaran</span>
-                    <span class="summary-value">Rp {{ number_format($order->total, 0, ',', '.') }}</span>
+                    <span class="summary-value">Rp {{ number_format($order->total + $order->shipping_cost + $order->admin_fee, 0, ',', '.') }}</span>
                 </div>
             </div>
         </div>
