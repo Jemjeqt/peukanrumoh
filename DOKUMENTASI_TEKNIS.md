@@ -1,6 +1,6 @@
 # 📚 DOKUMENTASI TEKNIS SISTEM PEUKAN RUMOH
 
-**Tanggal:** 27 Desember 2024  
+**Tanggal:** 07 Januari 2026 (Update)  
 **Platform:** E-Commerce Marketplace  
 **Framework:** Laravel 11
 
@@ -277,6 +277,30 @@ CREATE TABLE `returns` (
     CONSTRAINT `returns_replacement_kurir_id_foreign` 
         FOREIGN KEY (`replacement_kurir_id`) REFERENCES `users`(`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------
+-- Table: categories (BARU - 07 Januari 2026)
+-- Kategori produk yang dikelola oleh admin
+-- -----------------------------------------------------
+CREATE TABLE `categories` (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `name` VARCHAR(255) NOT NULL UNIQUE,
+    `icon` VARCHAR(255) NULL,
+    `is_active` TINYINT(1) NOT NULL DEFAULT 1,
+    `created_at` TIMESTAMP NULL,
+    `updated_at` TIMESTAMP NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Seed default categories
+INSERT INTO `categories` (`name`, `icon`, `is_active`, `created_at`, `updated_at`) VALUES
+('Sayuran', '🥬', 1, NOW(), NOW()),
+('Buah', '🍎', 1, NOW(), NOW()),
+('Bumbu', '🧄', 1, NOW(), NOW()),
+('Protein', '🥚', 1, NOW(), NOW()),
+('Sembako', '🍚', 1, NOW(), NOW()),
+('Daging', '🥩', 1, NOW(), NOW()),
+('Ikan', '🐟', 1, NOW(), NOW()),
+('Kebutuhan Harian', '🧴', 1, NOW(), NOW());
 ```
 
 ## 1.2 Ringkasan Struktur Database
@@ -297,6 +321,7 @@ CREATE TABLE `returns` (
 | 12 | `order_items` | Item dalam pesanan |
 | 13 | `reviews` | Review produk |
 | 14 | `returns` | Pengembalian barang |
+| 15 | `categories` | Kategori produk (**BARU**) |
 
 ## 1.3 Relasi Antar Tabel (ERD)
 
@@ -312,6 +337,7 @@ products (1) ───────────── (N) reviews
 orders (1) ─────────────── (N) order_items
 orders (1) ─────────────── (N) reviews
 orders (1) ─────────────── (N) returns
+categories (1) ─────────── (N) products (via name)
 ```
 
 ---
@@ -406,6 +432,9 @@ orders (1) ─────────────── (N) returns
 | 45 | `v_admin_reviews_index` | `admin.reviews.index` |
 | 46 | `v_admin_reports_monthly` | `admin.reports.monthly` |
 | 47 | `v_admin_partials_sidebar_menu` | `admin.partials.sidebar-menu` |
+| 48 | `v_admin_categories_index` | `admin.categories.index` (**BARU**) |
+| 49 | `v_admin_categories_create` | `admin.categories.create` (**BARU**) |
+| 50 | `v_admin_categories_edit` | `admin.categories.edit` (**BARU**) |
 
 ### Layout Views
 | No | Nama View | Path Laravel |
@@ -432,10 +461,10 @@ orders (1) ─────────────── (N) returns
 | Pembeli | 3 |
 | Pedagang | 12 |
 | Kurir | 7 |
-| Admin | 14 |
+| Admin | 17 (+3 categories) |
 | Layouts | 3 |
 | Partials | 1 |
-| **Total** | **51** |
+| **Total** | **54** |
 
 ---
 
@@ -685,7 +714,32 @@ orders (1) ─────────────── (N) returns
 
 ---
 
-## 3.8 Ringkasan Model
+## 3.8 Model: Category (BARU)
+**File:** `app/Models/Category.php`  
+**Table:** `categories`  
+**Tanggal Ditambahkan:** 07 Januari 2026
+
+### Atribut (Fillable)
+| Atribut | Tipe Data |
+|---------|-----------|
+| `name` | `VARCHAR(255)` UNIQUE |
+| `icon` | `VARCHAR(255)` / NULL |
+| `is_active` | `BOOLEAN` |
+
+### Casts
+| Atribut | Cast To |
+|---------|---------|
+| `is_active` | `boolean` |
+
+### Functions
+| Function | Return Type | Deskripsi |
+|----------|-------------|-----------|
+| `scopeActive($query)` | `Builder` | Scope: kategori aktif saja |
+| `products()` | `HasMany` | Relasi ke produk berdasarkan nama kategori |
+
+---
+
+## 3.9 Ringkasan Model
 
 | No | Model | Table | Jumlah Atribut | Jumlah Functions |
 |----|-------|-------|:--------------:|:----------------:|
@@ -696,7 +750,8 @@ orders (1) ─────────────── (N) returns
 | 5 | `OrderItem` | `order_items` | 6 | 2 |
 | 6 | `Review` | `reviews` | 5 | 3 |
 | 7 | `ProductReturn` | `returns` | 17 | 9 |
-| **Total** | | **7 Model** | **62 Atribut** | **38 Functions** |
+| 8 | `Category` | `categories` | 3 | 2 (**BARU**) |
+| **Total** | | **8 Model** | **65 Atribut** | **40 Functions** |
 
 ---
 
@@ -991,7 +1046,55 @@ orders (1) ─────────────── (N) returns
 
 ---
 
-## 4.7 C_AUTH (Controller Auth)
+## 4.7 C_CATEGORY (Controller Category) - BARU
+
+**Hanya:** `Admin\CategoryController`  
+**Tanggal Ditambahkan:** 07 Januari 2026
+
+### Model yang Digunakan
+| Model | Keterangan |
+|-------|------------|
+| `Category` | CRUD kategori produk |
+| `Product` | Cek relasi untuk validasi hapus |
+
+### Admin\CategoryController
+
+| Method | Return | Deskripsi |
+|--------|--------|-----------|
+| `index()` | `View` | List semua kategori dengan jumlah produk |
+| `create()` | `View` | Form tambah kategori baru |
+| `store(Request $request)` | `Redirect` | Simpan kategori baru |
+| `edit(Category $category)` | `View` | Form edit kategori |
+| `update(Request $request, Category $category)` | `Redirect` | Update data kategori |
+| `destroy(Category $category)` | `Redirect` | Hapus kategori |
+| `toggleStatus(Category $category)` | `Redirect` | Toggle status aktif/nonaktif |
+
+**Validasi `store()` dan `update()`:**
+| Field | Rules |
+|-------|-------|
+| `name` | `required\|string\|max:100\|unique:categories,name` |
+| `icon` | `nullable\|string\|max:10` |
+| `is_active` | `boolean` (default: true) |
+
+**Variabel `index()`:**
+| Variabel | Tipe Data | Deskripsi |
+|----------|-----------|-----------|
+| `$categories` | `Collection<Category>` | Daftar kategori dengan `products_count` |
+
+**Route yang Digunakan:**
+| Method | URI | Name |
+|--------|-----|------|
+| GET | `/admin/categories` | `admin.categories.index` |
+| GET | `/admin/categories/create` | `admin.categories.create` |
+| POST | `/admin/categories` | `admin.categories.store` |
+| GET | `/admin/categories/{category}/edit` | `admin.categories.edit` |
+| PUT | `/admin/categories/{category}` | `admin.categories.update` |
+| DELETE | `/admin/categories/{category}` | `admin.categories.destroy` |
+| POST | `/admin/categories/{category}/toggle` | `admin.categories.toggle` |
+
+---
+
+## 4.8 C_AUTH (Controller Auth)
 
 **Menggabungkan:** `Auth\AuthController`, `Api\AuthController`
 
@@ -1096,12 +1199,13 @@ orders (1) ─────────────── (N) returns
 | C_RETURN | 3 | 11 |
 | C_REVIEW | 2 | 2 |
 | C_USER | 1 | 9 |
+| C_CATEGORY | 1 | 7 (**BARU**) |
 | C_AUTH | 2 | 9 |
 | C_CART | 1 | 5 |
 | C_CHECKOUT | 1 | 6 |
 | C_HOME | 1 | 1 |
 | C_PROFILE | 1 | 3 |
-| **TOTAL** | **23 Controller** | **82 Methods** |
+| **TOTAL** | **24 Controller** | **89 Methods** |
 
 ---
 
@@ -1649,6 +1753,58 @@ orders (1) ─────────────── (N) returns
 
 ---
 
+### v_admin_categories_index (`admin.categories.index`) - BARU
+
+**Atribut**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ categories_table` | `JTable` | Tabel daftar kategori |
+| 2 | `+ category_icon` | `JLabel` | Icon emoji kategori |
+| 3 | `+ category_name` | `JLabel` | Nama kategori |
+| 4 | `+ products_count` | `JLabel` | Jumlah produk per kategori |
+| 5 | `+ status_badge` | `JBadge` | Status aktif/nonaktif |
+| 6 | `+ btnAddCategory` | `JButton` | Tombol tambah kategori |
+| 7 | `+ btnEdit` | `JButton` | Tombol edit kategori |
+| 8 | `+ btnDelete` | `JButton` | Tombol hapus kategori |
+| 9 | `+ btnToggleStatus` | `JButton` | Toggle aktif/nonaktif |
+
+**Functions**
+| No | Nama Function | Deskripsi |
+|----|---------------|-----------|
+| 1 | `+ confirmDelete()` | Konfirmasi hapus kategori |
+
+---
+
+### v_admin_categories_create (`admin.categories.create`) - BARU
+
+**Atribut**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ name` | `JTextField` | Nama kategori (max 100 char) |
+| 2 | `+ icon` | `JTextField` | Icon emoji (max 10 char) |
+| 3 | `+ is_active` | `JCheckBox` | Status aktif |
+| 4 | `+ btnSave` | `JButton` | Tombol simpan |
+| 5 | `+ btnCancel` | `JButton` | Tombol batal |
+
+**Functions:** *Tidak ada JavaScript function*
+
+---
+
+### v_admin_categories_edit (`admin.categories.edit`) - BARU
+
+**Atribut**
+| No | Nama Atribut | Tipe Komponen | Keterangan |
+|----|--------------|---------------|------------|
+| 1 | `+ name` | `JTextField` | Nama kategori |
+| 2 | `+ icon` | `JTextField` | Icon emoji |
+| 3 | `+ is_active` | `JCheckBox` | Status aktif |
+| 4 | `+ btnUpdate` | `JButton` | Tombol update |
+| 5 | `+ btnCancel` | `JButton` | Tombol batal |
+
+**Functions:** *Tidak ada JavaScript function*
+
+---
+
 ## 5.11 RINGKASAN VIEW
 
 | Bagian | Jumlah Views | Atribut | Functions |
@@ -1662,8 +1818,8 @@ orders (1) ─────────────── (N) returns
 | Pembeli | 3 | 20 | 0 |
 | Pedagang | 12 | ~60 | 2 |
 | Kurir | 7 | ~30 | 0 |
-| Admin | 14 | ~55 | 2 |
-| **TOTAL** | **51** | **~270** | **6** |
+| Admin | 17 (+3 categories) | ~65 | 3 |
+| **TOTAL** | **54** | **~280** | **7** |
 
 ### JavaScript Functions yang Ditemukan
 
@@ -1675,6 +1831,7 @@ orders (1) ─────────────── (N) returns
 | 4 | `pedagang.products.create` | `previewImage()` | Preview gambar |
 | 5 | `admin.users.index` | `confirmDelete()` | Konfirmasi hapus user |
 | 6 | `admin.users.index` | `loadUserData()` | Load data AJAX |
+| 7 | `admin.categories.index` | `confirmDelete()` | Konfirmasi hapus kategori (**BARU**) |
 
 ---
 
@@ -1682,17 +1839,26 @@ orders (1) ─────────────── (N) returns
 
 | Komponen | Jumlah |
 |----------|:------:|
-| **Tabel Database** | 14 |
-| **Views** | 51 |
-| **Atribut View** | ~270 |
-| **Functions View** | 6 |
-| **Models** | 7 |
-| **Controllers** | 23 |
-| **Methods** | 82 |
-| **Atribut Model** | 62 |
-| **Functions Model** | 38 |
+| **Tabel Database** | 15 |
+| **Views** | 54 |
+| **Atribut View** | ~280 |
+| **Functions View** | 7 |
+| **Models** | 8 |
+| **Controllers** | 24 |
+| **Methods** | 89 |
+| **Atribut Model** | 65 |
+| **Functions Model** | 40 |
+
+---
+
+## Update Log
+
+| Tanggal | Perubahan |
+|---------|-----------|
+| 27 Desember 2024 | Dokumentasi awal dibuat |
+| 07 Januari 2026 | Penambahan fitur **Category Management**: tabel `categories`, Model `Category`, Controller `CategoryController`, 3 views kategori admin |
 
 ---
 
 **Dokumentasi ini dibuat secara otomatis dari source code project Peukan Rumoh.**  
-**Tanggal Pembuatan:** 27 Desember 2024
+**Tanggal Update Terakhir:** 07 Januari 2026

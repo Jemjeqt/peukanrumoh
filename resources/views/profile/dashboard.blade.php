@@ -18,9 +18,15 @@
 <div class="card mb-2" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border: none; color: white;">
     <div class="card-body">
         <div class="d-flex align-center gap-2">
+            @if($user->isPedagang() && $user->store_logo)
+            <div style="width: 80px; height: 80px; border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; overflow: hidden;">
+                <img src="{{ asset('storage/' . $user->store_logo) }}" alt="Logo" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            @else
             <div style="width: 80px; height: 80px; background: rgba(255,255,255,0.2); border: 3px solid rgba(255,255,255,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 700;">
                 {{ strtoupper(substr($user->name, 0, 1)) }}
             </div>
+            @endif
             <div>
                 <h2 style="margin: 0; color: white; font-size: 1.5rem;">{{ $user->name }}</h2>
                 <p style="margin: 0; opacity: 0.9;">{{ $user->email }}</p>

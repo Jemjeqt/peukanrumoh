@@ -492,7 +492,7 @@ class CartController extends Controller
 
 | Method | Endpoint | Auth | Deskripsi |
 |--------|----------|:----:|-----------|
-| POST | `/register` | No | Register user baru |
+| POST | `/register` | No | Register user baru (name, email, phone, address, password) |
 | POST | `/login` | No | Login & get token |
 | GET | `/products` | No | List semua produk |
 | GET | `/products/{id}` | No | Detail produk |
@@ -560,7 +560,7 @@ class CartController extends Controller
 
 | No | Fitur | Deskripsi |
 |----|-------|-----------|
-| 1 | Registrasi & Login | Mendaftar akun baru dan login dengan email/password |
+| 1 | Registrasi & Login | Mendaftar akun baru (nama, email, nomor HP, alamat, password) dan login dengan email/password |
 | 2 | Browse Produk | Melihat katalog produk dengan filter kategori |
 | 3 | Keranjang Belanja | Mengelola item di keranjang sebelum checkout |
 | 4 | Checkout & Pembayaran | Proses pemesanan dengan pilihan metode bayar (COD, Transfer, E-Wallet) |

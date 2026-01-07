@@ -111,106 +111,8 @@
             border-color: white;
         }
         
-        /* Product Marquee - 2 Rows */
-        .marquee-section {
-            background: linear-gradient(180deg, #fff 0%, #f8fffe 100%);
-            padding: 2.5rem 0;
-            overflow: hidden;
-        }
-        
-        .marquee-section h3 {
-            text-align: center;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #1a1a2e;
-            margin-bottom: 0.5rem;
-        }
-        
-        .marquee-section p {
-            text-align: center;
-            color: #888;
-            margin-bottom: 1.5rem;
-            font-size: 0.95rem;
-        }
-        
-        .marquee-wrapper {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        
-        .marquee {
-            display: flex;
-            animation: marquee-left 30s linear infinite;
-        }
-        
-        .marquee.reverse {
-            animation: marquee-right 30s linear infinite;
-        }
-        
-        .marquee:hover,
-        .marquee.reverse:hover {
-            animation-play-state: paused;
-        }
-        
-        @keyframes marquee-left {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-        
-        @keyframes marquee-right {
-            0% { transform: translateX(-50%); }
-            100% { transform: translateX(0); }
-        }
-        
-        .marquee-item {
-            flex-shrink: 0;
-            width: 180px;
-            margin: 0 0.75rem;
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            border: 1px solid #eee;
-        }
-        
-        .marquee-item:hover {
-            transform: scale(1.05);
-            box-shadow: 0 8px 25px rgba(17, 153, 142, 0.15);
-            border-color: #11998e;
-        }
-        
-        .marquee-img {
-            width: 100%;
-            height: 100px;
-            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-        }
-        
-        .marquee-info {
-            padding: 0.75rem;
-            text-align: center;
-        }
-        
-        .marquee-name {
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: #333;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .marquee-price {
-            font-weight: 700;
-            color: #11998e;
-            font-size: 0.9rem;
-        }
-        
+
+
         /* Stats Bar */
         .stats-bar {
             background: white;
@@ -689,29 +591,6 @@
         </div>
     </section>
     
-    <!-- Product Marquee -->
-    <section class="marquee-section">
-        <h3>🔥 Produk Populer</h3>
-        <p>Contoh produk dari setiap kategori</p>
-        
-        <div class="marquee-wrapper">
-            <div class="marquee">
-                <div class="marquee-item"><div class="marquee-img">🥬</div><div class="marquee-info"><div class="marquee-name">Kangkung</div><div class="marquee-price">Rp 5.000</div></div></div>
-                <div class="marquee-item"><div class="marquee-img">🥭</div><div class="marquee-info"><div class="marquee-name">Mangga</div><div class="marquee-price">Rp 25.000</div></div></div>
-                <div class="marquee-item"><div class="marquee-img">🧄</div><div class="marquee-info"><div class="marquee-name">Bawang Putih</div><div class="marquee-price">Rp 35.000</div></div></div>
-                <div class="marquee-item"><div class="marquee-img">🥚</div><div class="marquee-info"><div class="marquee-name">Telur Ayam</div><div class="marquee-price">Rp 28.000</div></div></div>
-                <div class="marquee-item"><div class="marquee-img">🍚</div><div class="marquee-info"><div class="marquee-name">Beras 5kg</div><div class="marquee-price">Rp 65.000</div></div></div>
-                <div class="marquee-item"><div class="marquee-img">�</div><div class="marquee-info"><div class="marquee-name">Daging Sapi</div><div class="marquee-price">Rp 120.000</div></div></div>
-                <!-- Duplicate for seamless loop -->
-                <div class="marquee-item"><div class="marquee-img">🥬</div><div class="marquee-info"><div class="marquee-name">Kangkung</div><div class="marquee-price">Rp 5.000</div></div></div>
-                <div class="marquee-item"><div class="marquee-img">🥭</div><div class="marquee-info"><div class="marquee-name">Mangga</div><div class="marquee-price">Rp 25.000</div></div></div>
-                <div class="marquee-item"><div class="marquee-img">�</div><div class="marquee-info"><div class="marquee-name">Bawang Putih</div><div class="marquee-price">Rp 35.000</div></div></div>
-                <div class="marquee-item"><div class="marquee-img">🥚</div><div class="marquee-info"><div class="marquee-name">Telur Ayam</div><div class="marquee-price">Rp 28.000</div></div></div>
-                <div class="marquee-item"><div class="marquee-img">🍚</div><div class="marquee-info"><div class="marquee-name">Beras 5kg</div><div class="marquee-price">Rp 65.000</div></div></div>
-                <div class="marquee-item"><div class="marquee-img">�</div><div class="marquee-info"><div class="marquee-name">Daging Sapi</div><div class="marquee-price">Rp 120.000</div></div></div>
-            </div>
-        </div>
-    </section>
 
 
     <!-- Categories - 3x3 Grid -->

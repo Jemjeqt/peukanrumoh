@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Pedagang;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -37,7 +38,7 @@ class ProductController extends Controller
 
     public function create()
     {
-        $categories = ['Sayuran', 'Buah', 'Bumbu', 'Protein', 'Sembako', 'Daging', 'Ikan', 'Kebutuhan Harian'];
+        $categories = Category::active()->orderBy('name')->pluck('name')->toArray();
         
         return view('pedagang.products.create', compact('categories'));
     }
@@ -77,7 +78,7 @@ class ProductController extends Controller
     public function show(Product $product)
     {
         // Ensure pedagang only views their own products
-        if ($product->user_id !== auth()->id()) {
+        if ((int) $product->user_id !== (int) auth()->id()) {
             abort(403);
         }
 
@@ -94,11 +95,11 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
         // Ensure pedagang only edits their own products
-        if ($product->user_id !== auth()->id()) {
+        if ((int) $product->user_id !== (int) auth()->id()) {
             abort(403);
         }
 
-        $categories = ['Sayuran', 'Buah', 'Bumbu', 'Protein', 'Sembako', 'Daging', 'Ikan', 'Kebutuhan Harian'];
+        $categories = Category::active()->orderBy('name')->pluck('name')->toArray();
 
         if (request()->ajax()) {
             return response()->json([
@@ -112,7 +113,7 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product)
     {
-        if ($product->user_id !== auth()->id()) {
+        if ((int) $product->user_id !== (int) auth()->id()) {
             abort(403);
         }
 
@@ -151,7 +152,7 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
-        if ($product->user_id !== auth()->id()) {
+        if ((int) $product->user_id !== (int) auth()->id()) {
             abort(403);
         }
 

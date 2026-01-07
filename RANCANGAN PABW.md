@@ -207,7 +207,7 @@ peukan-rumoh/
 ### a. Fitur Pembeli (Customer)
 
 **1. Registrasi dan Login**  
-Pengguna baru dapat mendaftar sebagai pembeli dengan mengisi formulir registrasi yang mencakup nama, email, dan password. Sistem akan memvalidasi data dan membuat akun baru. Setelah terdaftar, pembeli dapat login menggunakan email dan password untuk mengakses fitur belanja. Tersedia juga opsi "Ingat Saya" untuk kemudahan login selanjutnya.
+Pengguna baru dapat mendaftar sebagai pembeli dengan mengisi formulir registrasi yang mencakup nama lengkap, email, nomor HP (10-15 digit), alamat lengkap, dan password. Sistem akan memvalidasi data termasuk format nomor HP dan panjang alamat minimum 10 karakter. Setelah terdaftar, pembeli dapat login menggunakan email dan password untuk mengakses fitur belanja. Tersedia juga opsi "Ingat Saya" untuk kemudahan login selanjutnya.
 
 **2. Berbelanja Produk (Shopping)**  
 Pembeli dapat menjelajahi katalog produk yang tersedia dengan berbagai pilihan kategori seperti Sayuran, Buah, Daging, Ikan, dan lainnya. Sistem menampilkan produk dalam bentuk kartu yang memuat gambar, nama produk, harga, dan nama toko pedagang. Pembeli dapat melihat detail produk termasuk deskripsi lengkap, stok tersedia, dan ulasan dari pembeli lain sebelum memutuskan untuk membeli.

@@ -76,7 +76,10 @@
                         @endif
                     </td>
                     <td>
-                        <a href="{{ route('pedagang.products.show', $product) }}" class="btn btn-sm btn-primary">Detail</a>
+                        <div class="d-flex gap-1">
+                            <a href="{{ route('pedagang.products.edit', $product) }}" class="btn btn-sm btn-warning">✏️ Edit</a>
+                            <a href="{{ route('pedagang.products.show', $product) }}" class="btn btn-sm btn-primary">Detail</a>
+                        </div>
                     </td>
                 </tr>
                 @empty

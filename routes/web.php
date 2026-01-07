@@ -122,6 +122,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Reviews (laporan ulasan)
     Route::get('/reviews', [App\Http\Controllers\Admin\ReviewController::class, 'index'])->name('reviews.index');
     
+    // Category management
+    Route::resource('categories', App\Http\Controllers\Admin\CategoryController::class)->except(['show']);
+    Route::post('/categories/{category}/toggle', [App\Http\Controllers\Admin\CategoryController::class, 'toggleStatus'])->name('categories.toggle');
+    
     // Report Export
     Route::get('/report/export', [AdminDashboardController::class, 'exportReport'])->name('report.export');
 });

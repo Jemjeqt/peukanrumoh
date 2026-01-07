@@ -635,7 +635,13 @@
         
         <!-- User Info (Above Logout) -->
         <div class="sidebar-user" style="border-top: 1px solid var(--sidebar-light); border-bottom: none;">
+            @if(auth()->user()->isPedagang() && auth()->user()->store_logo)
+            <div class="sidebar-avatar" style="padding: 0; overflow: hidden;">
+                <img src="{{ asset('storage/' . auth()->user()->store_logo) }}" alt="Logo" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            @else
             <div class="sidebar-avatar">{{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}</div>
+            @endif
             <div style="flex: 1; min-width: 0;">
                 <div class="sidebar-user-name" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ auth()->user()->name ?? 'User' }}</div>
                 <div class="sidebar-user-email" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ auth()->user()->email ?? '' }}</div>

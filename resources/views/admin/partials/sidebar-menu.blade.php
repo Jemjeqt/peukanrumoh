@@ -30,6 +30,12 @@
     </a>
 </li>
 <li>
+    <a href="{{ route('admin.categories.index') }}" class="sidebar-link {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
+        <span class="sidebar-link-icon">🏷️</span>
+        <span>Kategori</span>
+    </a>
+</li>
+<li>
     <a href="{{ route('admin.users.index') }}" class="sidebar-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
         <span class="sidebar-link-icon">👥</span>
         <span>Users</span>
