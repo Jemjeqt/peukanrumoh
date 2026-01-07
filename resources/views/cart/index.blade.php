@@ -601,6 +601,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             fetch(form.action, {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                     'Accept': 'application/json'
@@ -657,6 +658,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     fetch(form.action, {
                         method: 'POST',
+                        credentials: 'same-origin',
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                             'Accept': 'application/json'

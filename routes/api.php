@@ -22,6 +22,10 @@ Route::get('/products/{product}', [ProductController::class, 'show']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
+    
+    // User profile management (for Flutter)
+    Route::put('/user/profile', [AuthController::class, 'updateProfile']);
+    Route::post('/user/avatar', [AuthController::class, 'uploadAvatar']);
 
     // Pedagang product management
     Route::post('/products', [ProductController::class, 'store']);
@@ -44,6 +48,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', 'store');
         Route::get('/{order}', 'show');
         Route::post('/{order}/payment', 'confirmPayment');
+        Route::post('/{order}/confirm-delivery', 'confirmDelivery');
+        Route::post('/{order}/review', 'storeReview');
+        Route::post('/{order}/return', 'storeReturn');
+        Route::post('/{order}/confirm-replacement', 'confirmReplacement');
+        Route::post('/{order}/confirm-refund', 'confirmRefund');
     });
 });
 

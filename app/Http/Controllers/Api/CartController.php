@@ -25,6 +25,7 @@ class CartController extends Controller
             'data' => [
                 'items' => $cartItems,
                 'total' => $total,
+                'auth_user_id' => auth()->id(), // DEBUG: show authenticated user ID
             ],
         ]);
     }
@@ -86,11 +87,19 @@ class CartController extends Controller
      */
     public function update(Request $request, Cart $cart)
     {
-        // Verify ownership
-        if ($cart->user_id !== auth()->id()) {
+        // Verify ownership - use intval to ensure type consistency
+        $cartUserId = intval($cart->user_id);
+        $authUserId = intval(auth()->id());
+        
+        if ($cartUserId !== $authUserId) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized',
+                'debug' => [
+                    'cart_user_id' => $cartUserId,
+                    'auth_user_id' => $authUserId,
+                    'cart_id' => $cart->id,
+                ],
             ], 403);
         }
 
@@ -120,11 +129,19 @@ class CartController extends Controller
      */
     public function destroy(Cart $cart)
     {
-        // Verify ownership
-        if ($cart->user_id !== auth()->id()) {
+        // Verify ownership - use intval to ensure type consistency
+        $cartUserId = intval($cart->user_id);
+        $authUserId = intval(auth()->id());
+        
+        if ($cartUserId !== $authUserId) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized',
+                'debug' => [
+                    'cart_user_id' => $cartUserId,
+                    'auth_user_id' => $authUserId,
+                    'cart_id' => $cart->id,
+                ],
             ], 403);
         }
 

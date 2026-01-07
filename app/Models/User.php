@@ -30,6 +30,9 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    // Append avatar field for API (Flutter compatibility)
+    protected $appends = ['avatar'];
+
     protected function casts(): array
     {
         return [
@@ -37,6 +40,12 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_approved' => 'boolean',
         ];
+    }
+
+    // Accessor for avatar (maps to store_logo)
+    public function getAvatarAttribute(): ?string
+    {
+        return $this->store_logo;
     }
 
     // Role Checks

@@ -52,6 +52,11 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    public function productReturn()
+    {
+        return $this->hasOne(ProductReturn::class);
+    }
+
     // Status helpers
     public function getStatusBadgeAttribute(): string
     {

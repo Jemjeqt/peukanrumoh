@@ -284,17 +284,69 @@
             height: 16px;
         }
         
-        /* Footer - CONSISTENT */
+        /* Footer - Full Style */
         .footer {
-            background: #1a1a1a;
-            color: #999;
-            padding: 1rem 1.5rem;
-            text-align: center;
-            font-size: 13px;
+            background: #1a1a2e;
+            color: white;
+            padding: 3rem 2rem 1.5rem;
             margin-top: auto;
         }
         
-        .footer a { color: var(--primary-light); text-decoration: none; }
+        .footer-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .footer-brand h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+        
+        .footer-brand h3 span {
+            color: #38ef7d;
+        }
+        
+        .footer-brand p {
+            color: #888;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+        
+        .footer-links h4 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .footer-links a {
+            display: block;
+            color: #888;
+            text-decoration: none;
+            font-size: 0.85rem;
+            padding: 0.25rem 0;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: #38ef7d;
+        }
+        
+        .footer-bottom {
+            border-top: 1px solid #333;
+            padding-top: 1.5rem;
+            text-align: center;
+            color: #666;
+            font-size: 0.85rem;
+        }
+        
+        @media (max-width: 768px) {
+            .footer-content { grid-template-columns: 1fr; text-align: center; }
+        }
         
         /* Responsive */
         @media (max-width: 768px) {
@@ -371,7 +423,35 @@
     </main>
     
     <footer class="footer">
-        &copy; {{ date('Y') }} <a href="{{ route('welcome') }}">Peukan Rumoh</a> - Pasar Online Terpercaya
+        <div class="footer-content">
+            <div class="footer-brand">
+                <h3>Peukan<span>Rumoh</span></h3>
+                <p>Pasar online terpercaya untuk kebutuhan dapur Anda dari pedagang lokal.</p>
+            </div>
+            
+            <div class="footer-links">
+                <h4>Belanja</h4>
+                <a href="{{ route('shop.index') }}">Semua Produk</a>
+                <a href="{{ route('shop.index', ['category' => 'Sayuran']) }}">Sayuran</a>
+                <a href="{{ route('shop.index', ['category' => 'Buah']) }}">Buah</a>
+            </div>
+            
+            <div class="footer-links">
+                <h4>Akun</h4>
+                <a href="{{ route('login') }}">Masuk</a>
+                <a href="{{ route('register') }}">Daftar</a>
+            </div>
+            
+            <div class="footer-links">
+                <h4>Bantuan</h4>
+                <a href="#">FAQ</a>
+                <a href="#">Kontak</a>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            &copy; {{ date('Y') }} Peukan Rumoh - Pasar Online Terpercaya
+        </div>
     </footer>
     
     <script>

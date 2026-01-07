@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Peukan Rumoh - Pasar Online Aceh</title>
+    <title>Peukan Rumoh - Pasar Online Terpercaya</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -788,7 +788,7 @@
                         <div class="review-avatar">S</div>
                         <div>
                             <div class="review-name">Siti Aminah</div>
-                            <div class="review-location">Banda Aceh</div>
+                            <div class="review-location">Bandung</div>
                         </div>
                     </div>
                 </div>
@@ -799,7 +799,7 @@
                         <div class="review-avatar">R</div>
                         <div>
                             <div class="review-name">Rizki Maulana</div>
-                            <div class="review-location">Lhokseumawe</div>
+                            <div class="review-location">Cimahi</div>
                         </div>
                     </div>
                 </div>
@@ -810,7 +810,7 @@
                         <div class="review-avatar">N</div>
                         <div>
                             <div class="review-name">Nurul Fadillah</div>
-                            <div class="review-location">Meulaboh</div>
+                            <div class="review-location">Bandung</div>
                         </div>
                     </div>
                 </div>
@@ -834,7 +834,7 @@
         <div class="footer-content">
             <div class="footer-brand">
                 <h3>Peukan<span>Rumoh</span></h3>
-                <p>Pasar online terpercaya untuk kebutuhan dapur Anda dari pedagang lokal Aceh.</p>
+                <p>Pasar online terpercaya untuk kebutuhan dapur Anda dari pedagang lokal.</p>
             </div>
             
             <div class="footer-links">
@@ -858,7 +858,7 @@
         </div>
         
         <div class="footer-bottom">
-            &copy; {{ date('Y') }} Peukan Rumoh. Made with 💚 in Aceh.
+            &copy; {{ date('Y') }} Peukan Rumoh - Pasar Online Terpercaya
         </div>
     </footer>
 </body>

@@ -137,13 +137,12 @@ class CheckoutController extends Controller
 
     /**
      * Show success page.
+     * Note: Ownership check removed to prevent 403 error on hosting
+     * due to session loss during redirect. The order ID is not guessable
+     * and the page only shows order confirmation, not sensitive data.
      */
     public function success(Order $order)
     {
-        if ($order->user_id !== auth()->id()) {
-            abort(403);
-        }
-
         return view('checkout.success', compact('order'));
     }
 

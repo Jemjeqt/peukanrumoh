@@ -79,4 +79,60 @@ class AuthController extends Controller
             'user' => $request->user(),
         ]);
     }
+
+    /**
+     * Update user profile
+     * PUT /api/user/profile
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string',
+            'store_name' => 'nullable|string|max:255',
+            'store_description' => 'nullable|string',
+        ]);
+
+        $user->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profil berhasil diperbarui',
+            'user' => $user->fresh(),
+        ]);
+    }
+
+    /**
+     * Upload user avatar
+     * POST /api/user/avatar
+     */
+    public function uploadAvatar(Request $request)
+    {
+        $request->validate([
+            'avatar' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // Max 5MB
+        ]);
+
+        $user = $request->user();
+
+        // Delete old avatar if exists
+        if ($user->store_logo && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->store_logo)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($user->store_logo);
+        }
+
+        // Store new avatar
+        $path = $request->file('avatar')->store('avatars', 'public');
+
+        // Update user with new avatar path
+        $user->update(['store_logo' => $path]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Avatar berhasil diupload',
+            'avatar_url' => asset('storage/' . $path),
+            'user' => $user->fresh(),
+        ]);
+    }
 }

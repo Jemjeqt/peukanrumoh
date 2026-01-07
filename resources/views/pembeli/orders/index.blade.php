@@ -340,11 +340,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 method: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Accept': 'application/json'
+                    'Accept': 'text/html'
                 },
-                body: new FormData(form)
+                body: new FormData(form),
+                credentials: 'same-origin'
             })
-            .then(() => {
+            .then(response => {
+                if (!response.ok) throw new Error('Request failed');
+                // Success - update UI
                 card.style.transition = 'all 0.3s ease';
                 card.style.background = '#d1fae5';
                 
