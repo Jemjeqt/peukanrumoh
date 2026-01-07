@@ -122,7 +122,9 @@ php artisan storage:link
 php artisan serve
 ```
 
-### Akun Demo
+### Akun Demo (Development Lokal)
+
+> **⚠️ Catatan**: Akun demo ini hanya untuk **development lokal** setelah menjalankan seeder. Akun pada hosting production menggunakan kredensial berbeda.
 
 | Role | Email | Password |
 |------|-------|----------|
