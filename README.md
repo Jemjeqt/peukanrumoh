@@ -29,6 +29,8 @@
 
 **Peukan Rumoh** (Bahasa Aceh: "Pasar Rumah") adalah platform e-commerce yang menghubungkan pedagang pasar tradisional dengan pembeli secara online. Sistem ini mendukung 4 role pengguna dengan fitur lengkap mulai dari manajemen produk hingga pengembalian barang.
 
+🌐 **Live Demo**: [peukanrumoh.sisteminformasikotacerdas.id](https://peukanrumoh.sisteminformasikotacerdas.id)
+
 ### 🎯 Tujuan
 - Mempermudah pedagang pasar tradisional menjual produk secara online
 - Memberikan pengalaman belanja yang nyaman bagi pembeli
@@ -171,10 +173,11 @@ Home → Shop → Cart → Checkout → Orders → Profile
 
 | Dokumen | Deskripsi |
 |---------|-----------|
-| [UML_Diagrams.md](./UML_Diagrams.md) | Use Case, Activity, Class, Sequence Diagram |
+| [LAPORAN_PABW.md](./LAPORAN_PABW.md) | Laporan lengkap proyek PABW |
 | [DOKUMENTASI_SISTEM.md](./DOKUMENTASI_SISTEM.md) | Dokumentasi lengkap sistem |
 | [DOKUMENTASI_TEKNIS.md](./DOKUMENTASI_TEKNIS.md) | Spesifikasi teknis & arsitektur |
 | [DESKRIPSI_DAN_DESAIN_UI.md](./DESKRIPSI_DAN_DESAIN_UI.md) | Deskripsi UI/UX |
+| [docs/UML_Diagrams/](./docs/UML_Diagrams/) | Use Case, Activity, Class, Sequence Diagram |
 | [docs/](./docs/) | Database SQL, Setup Guide, dll |
 
 ---
@@ -241,10 +244,21 @@ peukan-rumoh/
 
 Project ini dilisensikan di bawah [MIT License](LICENSE).
 
+
+---
+
+## 👥 Tim Pengembang
+
+| Nama | Role |
+|------|------|
+| **Nashrullah Al Himni** | Pengembang Inti & Autentikasi |
+| **Azhar Khairu Hafidz** | Pengembang Toko & Keranjang |
+| **Aziz Faturrahman** | Pengembang Pesanan & Profil |
+
 ---
 
 <p align="center">
-  <strong>Peukan Rumoh</strong> - Digitalisasi Pasar Tradisional 🏪
+  <strong>Peukan Rumoh</strong> - Pasar Online Terpercaya 🏪
   <br>
   <sub>Dibuat dengan ❤️ menggunakan Laravel</sub>
 </p>
